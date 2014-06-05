@@ -50,7 +50,11 @@ Inductive eqg {X : Type} (P : word X -> Prop) : relation (word X) :=
 Implicit Arguments Eq_rel [[X] [P] [w]].
 Implicit Arguments Eq_cons [[X] [P] [y] [z]].
 
-Definition eqgg {X} P := eq (@eqg X P).
+Definition eqgg {X} (P : word X -> Prop) := eq (@eqg X P).
+
+Lemma app_left: forall X (P : word X -> Prop) z x y, eqgg P x y -> eqgg P (z++x) (z++y).
+Proof. move => X P. elim => [|z zs H] x y //=.
+rewrite /eqgg -?app_comm_cons => [[n z1 z2 A]]. apply Eq_cons.
 
 (***************************)
 
