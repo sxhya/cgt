@@ -40,11 +40,19 @@ intros; split; [| split]; intros.
 (* Formalization of basic combinatorial group theory *)
 
 Definition word (X : Type) := list (X * bool).
-Inductive eqg {X : Type} : relation (word X) :=
- | Eq_nil  : eqg nil nil
- | Eq_ins  : forall (x : X) f y z, eqg y z -> eqg ((x, f) :: (x, negb f) :: y) z
- | Eq_cons : forall e y z, eqg y z -> eqg (e :: y) (e :: z).
 
+Notation "[ a ; .. ; b ]" := (a :: .. (b :: nil) ..).
+Inductive eqg {X : Type} (P : word X -> Prop) : relation (word X) :=
+ | Eq_nil  : eqg P nil nil
+ | Eq_triv : forall x f, eqg P [(x, f); (x, negb f)] nil
+ | Eq_rel  : forall w, P w -> eqg P w nil
+ | Eq_cons : forall e y z, eqg P y z -> eqg P (e :: y) (e :: z).
+Implicit Arguments Eq_rel [[X] [P] [w]].
+Implicit Arguments Eq_cons [[X] [P] [y] [z]].
+
+Definition eqgg {X} P := eq (@eqg X P).
+
+(***************************)
 
 Inductive term (X : Type) :=
  | Id : term X
