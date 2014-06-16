@@ -1,4 +1,4 @@
-Require Import ssreflect.
+Require Import Ssreflect.ssreflect.
 Require Import Arith List Setoid BinPos BinNat Ring Relations Bool.
 
 (* Formalization of the notion of equivalence relation *)
@@ -159,6 +159,67 @@ Lemma eqgg_invert: forall X (P : word X -> Prop) y z, eqgg P y z -> eqgg P (invw
 Proof. intros. apply (eqgg_redl P z). apply (eqgg_trans P nil (eqgg_invr P z)).
 apply (eqgg_plusr (invw y)) in H. apply (eqgg_trans P _ (eqgg_sym P (eqgg_invr P y))). apply H. Qed.
 
+Fixpoint Comm {X} (a b : word X) := a ++ b ++ (invw a) ++ (invw b).
+
+(* Some notation pertaining to commutative rings *)
+
+Module Type ComRing.
+Parameter carrier : Set.
+Parameter plus mul : carrier -> carrier -> carrier.
+Parameter inv : carrier -> carrier.
+Parameter zero unit : carrier.
+
+Reserved Notation "x +' y" (at level 50, left associativity).
+Reserved Notation "x -' y" (at level 50, left associativity).
+Reserved Notation "x *' y" (at level 40, left associativity).
+
+Notation "x +' y" := (plus x y).
+Notation "x *' y" := (mul x y).
+Notation "0" := zero.
+Notation "1" := unit.
+Notation "- x" := (inv x).
+Axiom plus_assoc: forall a b c, (a +' b) +' c = a +' (b +' c).
+Axiom mul_assoc: forall a b c, (a *' b) *' c = a *' (b *' c).
+Axiom plus_comm: forall a b, a +' b = b +' a.
+Axiom mul_comm: forall a b, a *' b = b *' a.
+Axiom mul_1_r: forall a, a *' 1 = a.
+Axiom mul_1_l: forall a, 1 *' a = a.
+Axiom plus_1_r: forall a, a +' 0 = a.
+Axiom plus_1_l: forall a, 0 +' a = a.
+Axiom inv_r: forall a, a +' (-a) = 0.
+Axiom inv_l: forall a, (-a) +' a = 0.
+End ComRing.
+
+(* Steinberg generators *)
+
+Module Steinberg (R : ComRing).
+
+Record Generator : Type := X {
+  i : nat; j : nat; p1 : i <> j;
+  xi : R.carrier}.
+
+Implicit Arguments X [[i] [j]].
+
+Import R.
+
+Definition x {i j} (p : i <> j) (xi : carrier) := [(X p xi, true)].
+
+Notation "x ^-1" := (invw x) (at level 29).
+Notation "x ** y" := (x ++ y) (at level 30).
+Notation "[ ~ x1 , x2 , .. , xn ]" :=
+  (Comm .. (Comm x1 x2) .. xn) (at level 29, left associativity).
+
+Inductive SteinbergRelation : word Generator -> Prop := 
+| XAdd : forall (a b : carrier) {i j : nat} (p : i <> j), 
+  SteinbergRelation ((x p a) ** (x p b) ** (x p (a +' b)) ^-1)
+| XCC : forall (a b : carrier) (i j k l : nat) (p : i <> j) (q : k <> l), i <> l -> j <> k -> 
+  SteinbergRelation [~ x p a, x q b]
+| XCC2 : forall (a b : carrier) (i j k : nat) (p : i <> j) (q : j <> k) (r : i <> k), 
+  SteinbergRelation ([~ x p a, x q b] ** (x r (a *' b)) ^-1).
+
+Definition SteinbergEqRel := eqgg SteinbergRelation.
+
+End Steinberg.
 (***************************)
 
 Inductive term (X : Type) :=
@@ -183,5 +244,3 @@ Notation "x ^ y" := (Conj x y) : rel_presentation.
 Notation "x ^-1" := (Inv x) (at level 29, left associativity) : rel_presentation.
 Notation "x ^+ n" := (Exp x n) (at level 29, left associativity) : rel_presentation.
 Notation "x ^- n" := (Inv (Exp x n)) (at level 29, left associativity) : rel_presentation.
-Notation "[ ~ x1 , x2 , .. , xn ]" :=
-  (Comm .. (Comm x1 x2) .. xn) : rel_presentation.
