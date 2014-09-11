@@ -57,7 +57,10 @@ intros. by rewrite /Comm ?GIM ?GII -?GA. Qed.
 
 (* ********************************************** *)
 
-Definition swap_neq {i j : nat}: i != j -> j != i. by rewrite eq_sym. Defined.
+Definition swap_neq {i j : nat}: i != j -> j != i. by rewrite eq_sym.  Defined.
+
+(* TODO *) 
+Lemma swapI {i j : nat} (p : i != j): swap_neq (swap_neq p) = p. Admitted. 
 
 Axiom X: forall {i j : nat}, (i != j) -> R -> ZZ.
 Definition pow (h g : ZZ) := (g ^-1) .* h .* g.
@@ -67,13 +70,14 @@ Lemma pow_mul h g1 g2: h ^ (g1 .* g2) = (h ^ g1) ^ g2.
 by rewrite /pow ?GIM ?GA. Qed.
 Lemma mul_pow g h1 h2: (h1 .* h2) ^ g = h1 ^ g .* h2 ^ g.
 by rewrite /pow ?GA -(GA g) GI IdG. Qed.
+Lemma powId g: g ^ Id = g. by rewrite /pow IdI IdG GId. Qed.
 
 Definition Z {i j : nat} (p : i != j) (r s : R) := (X p r) ^ (X (swap_neq p) s).
 
-Lemma Zdef {i j} (p : i!= j) r s: (X p r) ^ (X (swap_neq p) s) = Z p r s.
-by rewrite /Z. Qed.
+Lemma Zdef {i j} (p : i!= j) r s: (X p r) ^ (X (swap_neq p) s) = Z p r s. by rewrite /Z. Qed.
+
 Lemma Zdef'{i j} (p : i!= j) r s: (X (swap_neq p) r) ^ (X p s) = Z (swap_neq p) r s.
-rewrite /Z /=.
+by rewrite /Z swapI. Qed.
 
 Axiom ST0: forall {i j : nat} (ij : (i != j)) r s, X ij (r + s) = X ij r .* X ij s.
 Axiom ST1: forall {i j k : nat} (ij : (i != j)) (ik : (i != k)) (jk : (j != k)) r s,
@@ -94,9 +98,49 @@ intros. by rewrite -Comm_inv ST1 -ST0' inv_mul. Qed.
 Lemma pow_com: forall a b, a ^ b = [~ b ^-1, a] .* a. 
 intros. rewrite /pow. apply (GC Id). by rewrite -{1}(IG a) -GA /Comm GII GId. Qed. 
 
-Lemma ZLEMMA i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
- Z ij a (b * c) = Id.
+Lemma ST2': forall {i j k} (ik : i != k) (jk : j != k) (ij : i != j) a b, X ik a ^ X jk b = X ik a.
+intros. rewrite pow_com -ST0' ST2. by rewrite IdG. exact (swap_neq ik). exact jk. Qed.
+
+Lemma ST2'': forall {i j k} (ki : k != i) (kj : k != j) (ij : i != j) a b, X ki a ^ X kj b = X ki a.
+intros. rewrite pow_com -ST0' ST2. by rewrite IdG. exact (swap_neq kj). exact ki. Qed.
+
+Lemma R10 i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
+let RHS := 
+ X jk (- (b * c * (a * b))) .* X ik (a * b)
+.* (X (swap_neq ij) (- (b * (c * a * (b * c)))) .* X (swap_neq ik) (- (c * a * (b * c)))
+.* Z (swap_neq jk) (- (c * a)) (- b)) .* Z ik (- a * b) (- c)
+.* (X (swap_neq jk) (c * a) .* X ij a) in
+ Z ij a (b * c) = RHS.
 intros. rewrite /Z. set ji := swap_neq ij. set ki := swap_neq ik.  set kj := swap_neq jk.
-rewrite -(ST1 jk ji ki) /Comm ?pow_mul (pow_com (X ij a)) -ST0' ST1' mul_pow inv_mul mul_inv invI.
-rewrite (pow_com (X ij a)) -ST0' (ST1 ki kj ij) inv_mul Zdef.
-rewrite 2!(mul_pow (X jk (-b))). Check Zdef.
+rewrite -(ST1 jk ji ki) /Comm ?pow_mul (pow_com (X ij a)) -ST0' ST1' mul_pow inv_mul mul_inv invI
+        (pow_com (X ij a)) -ST0' (ST1 ki kj ij) inv_mul.
+rewrite 2!(mul_pow (X jk (-b))) Zdef' -(pow_mul). replace (swap_neq jk) with kj by done.
+replace (X ki c .* X jk (-b)) with ([~ X ki c, X jk (-b)] .* X jk (-b) .* X ki c); 
+ [|by rewrite /Comm ?GA -(GA (X jk (- b) ^-1)) IG IdG IG GId].
+rewrite (ST1' jk ji ki) invI ?pow_mul (pow_com (X ik (a * b))) -ST0' ST1 inv_mul.
+rewrite (mul_pow (X jk (- b))) {3}/pow -ST0' invI -2!ST0 (plus_comm b) plus_assoc inv_r plus_1_r. 
+rewrite ST2'; [|exact ij]. rewrite (mul_pow (X ki c)) Zdef (pow_com _ (X ki c)) -ST0' ST1' invI mul_inv.
+rewrite (pow_com (X ij a)) -ST0' invI ST1'.
+remember (Z ik (a*b) c) as Z1. remember (Z kj (-(c*a)) (-b)) as Z2.
+rewrite -?GA ?mul_pow HeqZ1 HeqZ2 {HeqZ1 HeqZ2 Z1 Z2}.
+rewrite {1}/Z -pow_mul. replace (swap_neq ik) with ki; [|done]. rewrite -ST0 inv_r Xzero powId Zdef.
+rewrite ST2'; [|exact jk]. rewrite (pow_com _ (X ki (- c))) -ST0' invI ST1' invI ST0' -GA IG IdG.
+rewrite {1}/Z -pow_mul swapI. 
+replace (X jk (- b) .* X ki (- c)) with ([~X jk (- b), X ki (- c)] .* X ki (- c) .* X jk (- b));
+  [|by rewrite /Comm ?GA -(GA (X ki (- c) ^-1)) IG IdG IG GId].
+rewrite ST1 inv_mul mul_inv invI (GA (X ji (b * c))) pow_mul (pow_com (X kj (- (c * a)))) -ST0' ST1' invI mul_inv mul_pow.
+assert (A0: X ki (- c) .* X jk (- b) = [~ X ki (- c) , X jk (- b)] .* X jk (- b) .* X ki (- c)) by by
+ rewrite /Comm ?GA -(GA (X jk (- b) ^-1)) IG IdG IG GId.
+rewrite {1}A0 {A0} ST1' inv_mul mul_inv invI (pow_com (X ij a)) -ST0' invI ST1
+        (GA (X ji (- b * c))) pow_mul ST2'; [|exact kj].
+rewrite 2!pow_mul ST2''; [|exact ji].
+rewrite Zdef' (pow_com (X ki (- (c * a * (b * c))))) -ST0' invI ST1 mul_inv
+        mul_pow ST2' /pow;[|exact jk].
+by rewrite -ST0' invI -?ST0 plus_comm -plus_assoc inv_l plus_1_l. Qed.
+
+Corollary R1 i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
+ Z ij a (b * c) = X jk (- (b * c * (a * b))) .* X ik (a * b)
+.* (X (swap_neq ij) (- (b * (c * a * (b * c)))) .* X (swap_neq ik) (- (c * a * (b * c)))
+.* Z (swap_neq jk) (- (c * a)) (- b)) .* Z ik (- a * b) (- c)
+.* (X (swap_neq jk) (c * a) .* X ij a).
+intros. by apply R10. Qed.
