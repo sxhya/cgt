@@ -142,5 +142,10 @@ Corollary R1 i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
  Z ij a (b * c) = X jk (- (b * c * (a * b))) .* X ik (a * b)
 .* (X (swap_neq ij) (- (b * (c * a * (b * c)))) .* X (swap_neq ik) (- (c * a * (b * c)))
 .* Z (swap_neq jk) (- (c * a)) (- b)) .* Z ik (- a * b) (- c)
-.* (X (swap_neq jk) (c * a) .* X ij a).
-intros. by apply R10. Qed.
+.* (X (swap_neq jk) (c * a) .* X ij a). intros. by apply R10. Qed.
+
+Corollary R2 i j k a b: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
+ Z ij a b = X jk (- (b * (a * b))) .* X ik (a * b)
+.* (X (swap_neq ij) (- (b * (a * b))) .* X (swap_neq ik) (- (a * b))
+.* Z (swap_neq jk) (- a) (- b)) .* Z ik (- a * b) (- unit)
+.* (X (swap_neq jk) a .* X ij a). intros. by rewrite -{1} (mul_1_r b) (R1 i j k a b unit ij ik jk) ?mul_1_r ?mul_1_l. Qed.
