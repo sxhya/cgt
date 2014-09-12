@@ -37,8 +37,11 @@ Lemma invI: forall a, -(-a) = a. Admitted.
 Axiom GId: forall g, g .* Id = g.
 Axiom IdG: forall g, Id .* g = g.
 Axiom GA : forall g1 g2 g3, g1 .* g2 .* g3 = g1 .* (g2 .* g3).
+
 Axiom GI : forall g, g .* (g ^-1) = Id.
+Corollary GI' g A: g .* ((g ^-1) .* A) = A. by rewrite -GA GI IdG. Qed.
 Axiom IG: forall g, (g ^-1) .* g = Id.
+Corollary IG' g A: (g^-1) .* (g .* A) = A. by rewrite -GA IG IdG. Qed.
 
 Lemma GC: forall g3 g1 g2, g1 .* g3 = g2 .* g3 -> g1 = g2.
 intros. have: (g1 .* g3 .* g3 ^-1 = g2 .* g3 .* g3 ^-1) by rewrite H.
@@ -151,25 +154,29 @@ let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
          .* Z kj (- a) (- b))    .* Z ik (- (a * b)) (- unit) .* X kj a .* X ij a.
  intros. by rewrite -{1} (mul_1_r b) (R1 i j k a b unit ij ik jk) ?mul_1_r ?mul_1_l. Qed.
 
-Ltac canc E := rewrite GA -?(GA E) ?GI ?IG ?IdG.
+Ltac expand := rewrite /Comm /pow ?GIM ?GII.
+Ltac cancel := rewrite ?GI' ?IG' ?GI ?IG.
+Ltac cancellate := expand; rewrite ?GA; cancel.
 
-Lemma HallWitt x y z: [~ y^-1, x, z]^ (y^-1) .* [~z^-1, y, x]^ (z^-1) .* [~x^-1, z, y] ^ (x^-1) = Id.
-rewrite /Comm /pow ?GIM -?GA 11!GA ?GII.
-canc x. canc (z^-1). canc (x^-1). canc z. canc (y^-1). canc (z^-1). rewrite 6!GA.
-canc z. canc (y^-1). canc (z^-1). canc y. canc (x^-1). canc (y^-1). canc x. canc z. canc (x^-1).
-by rewrite -(GA y) GI IdG GI. Qed.
+Lemma HallWitt x y z: 
+ [~ y^-1, x, z] ^ (y^-1) .* 
+ [~ z^-1, y, x] ^ (z^-1) .* 
+ [~ x^-1, z, y] ^ (x^-1) = Id. by expand; rewrite ?GA; do 4 cancel. Qed.
 
 Corollary HallWitt2 x y z: [~ y, x^-1, z^-1]^ y .* [~z, y^-1, x^-1]^ (z) .* [~x, z^-1, y^-1] ^ x = Id.
 move: (HallWitt (x^-1) (y^-1) (z^-1)). by rewrite ?GII. Qed.
 
-Lemma CL1 x y z: [~z, x, y]^ z = [~x, z^-1, y^z].
-rewrite /Comm /pow ?GIM ?GII. canc (z^-1). symmetry. rewrite 3!GA. canc z. rewrite 2!GA. canc z. by rewrite ?GA. Qed.
+Lemma CL1 x y z: [~z, x, y]^ z = [~x, z^-1, y^z]. by cancellate. Qed.
+Lemma CL2 x y z: [~ x .* y, z] = [~y, z] ^ (x^-1) .* [~x, z]. by cancellate. Qed.
+Lemma CL3 x y z: [~ x, y .* z] = [~x, y] .* [~x, z] ^ (y^-1). by cancellate. Qed.
+Lemma CL4 x y z: [~ x, y] ^ z = [~x ^ z, y ^ z]. by cancellate. Qed.
 
 Corollary HallWitt3 x y z: 
- [~ x^-1, y^-1,  (z^-1)^y] .* 
-  [~ y^-1, z^-1,  (x^-1)^z] .* 
-   [~ z^-1, x^-1,  (y^-1)^x] = Id. by rewrite -?CL1 HallWitt2. Qed.
+ [~ x^-1, y^-1, (z^-1)^y] .* 
+ [~ y^-1, z^-1, (x^-1)^z] .* 
+ [~ z^-1, x^-1, (y^-1)^x] = Id. by rewrite -?CL1 HallWitt2. Qed.
 
-Corollary HallWitt4 x y z:
- [~x, y, z^(y^-1)] .*  [~y, z, x^(z^-1)] .*  [~z, x, y^(x^-1)] = Id.
-move: (HallWitt3 (x^-1) (y^-1) (z^-1)). by rewrite ?GII. Qed.
+Definition HW x y z := [~x, y, z^(y^-1)] .*  [~y, z, x^(z^-1)] .*  [~z, x, y^(x^-1)].
+
+Corollary HallWitt4 x y z: HW x y z = Id.
+move: (HallWitt3 (x^-1) (y^-1) (z^-1)). by rewrite /HW ?GII. Qed.
