@@ -161,3 +161,15 @@ by rewrite -(GA y) GI IdG GI. Qed.
 
 Corollary HallWitt2 x y z: [~ y, x^-1, z^-1]^ y .* [~z, y^-1, x^-1]^ (z) .* [~x, z^-1, y^-1] ^ x = Id.
 move: (HallWitt (x^-1) (y^-1) (z^-1)). by rewrite ?GII. Qed.
+
+Lemma CL1 x y z: [~z, x, y]^ z = [~x, z^-1, y^z].
+rewrite /Comm /pow ?GIM ?GII. canc (z^-1). symmetry. rewrite 3!GA. canc z. rewrite 2!GA. canc z. by rewrite ?GA. Qed.
+
+Corollary HallWitt3 x y z: 
+ [~ x^-1, y^-1,  (z^-1)^y] .* 
+  [~ y^-1, z^-1,  (x^-1)^z] .* 
+   [~ z^-1, x^-1,  (y^-1)^x] = Id. by rewrite -?CL1 HallWitt2. Qed.
+
+Corollary HallWitt4 x y z:
+ [~x, y, z^(y^-1)] .*  [~y, z, x^(z^-1)] .*  [~z, x, y^(x^-1)] = Id.
+move: (HallWitt3 (x^-1) (y^-1) (z^-1)). by rewrite ?GII. Qed.
