@@ -139,13 +139,25 @@ rewrite Zdef' (pow_com (X ki (- (c * a * (b * c))))) -ST0' invI ST1 mul_inv
 by rewrite -ST0' invI -?ST0 plus_comm -plus_assoc inv_l plus_1_l. Qed.
 
 Corollary R1 i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
- Z ij a (b * c) = X jk (- (b * c * (a * b))) .* X ik (a * b)
-.* (X (swap_neq ij) (- (b * (c * a * (b * c)))) .* X (swap_neq ik) (- (c * a * (b * c)))
-.* Z (swap_neq jk) (- (c * a)) (- b)) .* Z ik (- a * b) (- c)
-.* (X (swap_neq jk) (c * a) .* X ij a). intros. by apply R10. Qed.
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z ij a (b * c) = 
+X jk (- (b * c * a * b)) .* X ik (a * b) .* (X ji (- (b * c * a * b * c))
+    .* X ki (- (c * a * b * c)) .* Z kj (- (c * a)) (- b)) .* Z ik (- (a * b)) (- c) .* X kj (c * a) .* X ij a.
+intros. move: (R10 i j k a b c ij ik jk). by rewrite -GA -?mul_assoc inv_mul. Qed.
 
 Corollary R2 i j k a b: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
- Z ij a b = X jk (- (b * (a * b))) .* X ik (a * b)
-.* (X (swap_neq ij) (- (b * (a * b))) .* X (swap_neq ik) (- (a * b))
-.* Z (swap_neq jk) (- a) (- b)) .* Z ik (- a * b) (- unit)
-.* (X (swap_neq jk) a .* X ij a). intros. by rewrite -{1} (mul_1_r b) (R1 i j k a b unit ij ik jk) ?mul_1_r ?mul_1_l. Qed.
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+ Z ij a b = X jk (- (b * a * b)) .* X ik (a * b) .* (X ji (- (b * a * b)) .* X ki (- (a * b)) 
+         .* Z kj (- a) (- b))    .* Z ik (- (a * b)) (- unit) .* X kj a .* X ij a.
+ intros. by rewrite -{1} (mul_1_r b) (R1 i j k a b unit ij ik jk) ?mul_1_r ?mul_1_l. Qed.
+
+Ltac canc E := rewrite GA -?(GA E) ?GI ?IG ?IdG.
+
+Lemma HallWitt x y z: [~ y^-1, x, z]^ (y^-1) .* [~z^-1, y, x]^ (z^-1) .* [~x^-1, z, y] ^ (x^-1) = Id.
+rewrite /Comm /pow ?GIM -?GA 11!GA ?GII.
+canc x. canc (z^-1). canc (x^-1). canc z. canc (y^-1). canc (z^-1). rewrite 6!GA.
+canc z. canc (y^-1). canc (z^-1). canc y. canc (x^-1). canc (y^-1). canc x. canc z. canc (x^-1).
+by rewrite -(GA y) GI IdG GI. Qed.
+
+Corollary HallWitt2 x y z: [~ y, x^-1, z^-1]^ y .* [~z, y^-1, x^-1]^ (z) .* [~x, z^-1, y^-1] ^ x = Id.
+move: (HallWitt (x^-1) (y^-1) (z^-1)). by rewrite ?GII. Qed.
