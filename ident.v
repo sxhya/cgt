@@ -107,6 +107,9 @@ intros. rewrite pow_com -ST0' ST2. by rewrite IdG. exact (swap_neq ik). exact jk
 Lemma ST2'': forall {i j k} (ki : k != i) (kj : k != j) (ij : i != j) a b, X ki a ^ X kj b = X ki a.
 intros. rewrite pow_com -ST0' ST2. by rewrite IdG. exact (swap_neq kj). exact ki. Qed.
 
+Lemma Zinv {i j} (ij : i != j) (r s : R): Z ij (-r) s = (Z ij r s)^-1.
+by rewrite /Z /pow ST0' ?GIM ?GA GII. Qed.
+
 Lemma R10 i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
 let RHS := 
  X jk (- (b * c * (a * b))) .* X ik (a * b)
@@ -148,15 +151,15 @@ X jk (- (b * c * a * b)) .* X ik (a * b) .* (X ji (- (b * c * a * b * c))
     .* X ki (- (c * a * b * c)) .* Z kj (- (c * a)) (- b)) .* Z ik (- (a * b)) (- c) .* X kj (c * a) .* X ij a.
 intros. move: (R10 i j k a b c ij ik jk). by rewrite -GA -?mul_assoc inv_mul. Qed.
 
-Corollary R2 i j k a b: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
-let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
- Z ij a b = X jk (- (b * a * b)) .* X ik (a * b) .* (X ji (- (b * a * b)) .* X ki (- (a * b)) 
-         .* Z kj (- a) (- b))    .* Z ik (- (a * b)) (- unit) .* X kj a .* X ij a.
- intros. by rewrite -{1} (mul_1_r b) (R1 i j k a b unit ij ik jk) ?mul_1_r ?mul_1_l. Qed.
-
 Ltac expand := rewrite /Comm /pow ?GIM ?GII.
 Ltac cancel := rewrite ?GI' ?IG' ?GI ?IG.
 Ltac cancellate := expand; rewrite ?GA; cancel.
+
+Corollary R1F i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+ Z ij a (b * c) .* X ij (- a) .* X kj (- (c * a)) .*  Z ik (a * b) (- c) .* Z kj (c * a) (- b) .* 
+ X ki (c * a * b * c) .* X ji (b * c * a * b * c) .* X ik (- (a * b)) .* X jk (b * c * a * b) = Id.
+intros. rewrite (R1 i j k) /Z /pow /ji /ki /kj ?ST0' ?GII ?GA. by do 4 cancel. Qed.
 
 Lemma HallWitt x y z: 
  [~ y^-1, x, z] ^ (y^-1) .* 
