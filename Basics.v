@@ -169,15 +169,16 @@ Parameter plus mul : carrier -> carrier -> carrier.
 Parameter inv : carrier -> carrier.
 Parameter zero unit : carrier.
 
-Reserved Notation "x +' y" (at level 50, left associativity).
-Reserved Notation "x -' y" (at level 50, left associativity).
-Reserved Notation "x *' y" (at level 40, left associativity).
+(* Reserved Notation "x +' y" (at level 50, left associativity).
+Reserved Notation "x -' y" (at level 50, left associativity). *)
+Reserved Notation "x .* y" (at level 40, left associativity).
 
-Notation "x +' y" := (plus x y).
-Notation "x *' y" := (mul x y).
+Notation "x + y" := (plus x y) : ring_scope.
+Notation "x .* y" := (mul x y).
 Notation "0" := zero.
 Notation "1" := unit.
 Notation "- x" := (inv x).
+
 Axiom plus_assoc: forall a b c, (a +' b) +' c = a +' (b +' c).
 Axiom mul_assoc: forall a b c, (a *' b) *' c = a *' (b *' c).
 Axiom plus_comm: forall a b, a +' b = b +' a.
@@ -204,10 +205,10 @@ Import R.
 
 Definition x {i j} (p : i <> j) (xi : carrier) := [(X p xi, true)].
 
-Notation "x ^-1" := (invw x) (at level 29).
-Notation "x ** y" := (x ++ y) (at level 30).
+Notation "x ^-1" := (invw x) (at level 29) : group_scope.
+Notation "x * y" := (x ++ y) : group_scope.
 Notation "[ ~ x1 , x2 , .. , xn ]" :=
-  (Comm .. (Comm x1 x2) .. xn) (at level 29, left associativity).
+  (Comm .. (Comm x1 x2) .. xn) (at level 29, left associativity) : group_scope.
 
 Inductive SteinbergRelation : word Generator -> Prop := 
 | XAdd : forall (a b : carrier) {i j : nat} (p : i <> j), 

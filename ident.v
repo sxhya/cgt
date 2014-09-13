@@ -170,7 +170,9 @@ Lemma CL1 x y z: [~z, x, y]^ z = [~x, z^-1, y^z]. by cancellate. Qed.
 Lemma CL2 x y z: [~ x .* y, z] = [~y, z] ^ (x^-1) .* [~x, z]. by cancellate. Qed.
 Lemma CL3 x y z: [~ x, y .* z] = [~x, y] .* [~x, z] ^ (y^-1). by cancellate. Qed.
 Lemma CL4 x y z: [~ x, y] ^ z = [~x ^ z, y ^ z]. by cancellate. Qed.
-Lemma CL5 x y: [~ x, y] = y ^ (x^-1) .* y^-1. by cancellate. Qed.
+Lemma CL5 x y: [~ x, y] = y ^ (x^-1) .* y^-1. by expand. Qed.
+Lemma CL6 x y: [~ x, y] = x .* (x^-1) ^ (y^-1). by cancellate. Qed.
+
 
 Corollary HallWitt3 x y z: 
  [~ x^-1, y^-1, (z^-1)^y] .* 
@@ -185,14 +187,19 @@ move: (HallWitt3 (x^-1) (y^-1) (z^-1)). by rewrite /HW ?GII. Qed.
 Lemma R10' i j k (a b c : R): forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
 let RHS := 
-    Z ij a (- (b * c)) .* X ij (-a) .* X ki (- (c * a * b * c)) .* X kj (c * a * b * c * a)
- .* Z jk b (- (c * a)) .* X jk (-b) .* X ij (- (a * b * c * a)) .* X ik (a * b * c * a * b) 
- .* Z ki c (- (a * b)) .* X ki (-c) .* X jk (- (b * c * a * b)) .* X ji (b * c * a * b * c) in Id = RHS.
+Z ij a (- (b * c)) .* X ij (- a) .* X ki (- (c * a * b * c))
+.* X kj (c * a * b * c * a) .* X kj (c * a)
+.* Z kj (- (c * a)) (- b) .* X ij (- (a * b * c * a))
+.* X ik (a * b * c * a * b) .* X ik (a * b) .* Z ik (- (a * b)) (- c)
+.* X jk (- (b * c * a * b)) .* X ji (b * c * a * b * c) in Id = RHS.
+
 intros. assert (A0: HW (X jk b) (X ki c) (X ij a) = Id). apply HallWitt4.
-rewrite /HW ?pow_com -?ST0' ?GII ?invI ?ST1 ?CL3 ST1' (ST1' ik) (ST1' ji) in A0.
-rewrite ?CL4 -?ST0' ?ST2' in A0; [| exact kj| exact ji| exact ik].
-rewrite ?pow_com -?ST0' ?invI ?ST1 ?CL2 in A0.
-rewrite (ST1 ki) (ST1 ij) (ST1 jk) /pow ?inv_mul -?mul_assoc ?GII ?ST0' ?CL5 -?ST0' ?Zdef ?Zdef' in A0.
-remember (Z ij a (- (b * c))) as Z1. remember (Z jk b (- (c * a))) as Z2. remember (Z (swap_neq ik) c (- (a * b))) as Z3.
-rewrite ?GA ?ST0' ?IG' -?GA -?ST0' in A0. 
-move: A0. unfold RHS. unfold ji. unfold ki. unfold kj. subst. done. Qed.
+move: A0. rewrite /HW ?ST1 ?pow_com -?ST0' ?GII ?invI ?ST1 ?CL3 
+ ST1' (ST1' ik) (ST1' ji) ?CL4 -?ST0' ?ST2' ?pow_com -?ST0' ?invI ?ST1 ?mul_inv ?inv_mul -?mul_assoc
+ ?CL2 // (ST1 ki) (ST1 ij) (ST1 jk) /pow -?ST0' ?invI.
+remember ([ ~ X ji (b * c), X ij a]) as W1. rewrite CL5 -?ST0' Zdef in HeqW1.
+remember ([ ~ X kj (c * a), X jk b]) as W2. rewrite CL6 -?ST0' Zdef' in HeqW2.
+remember ([ ~ X ik (a * b), X ki c]) as W3. rewrite CL6 -?ST0' Zdef in HeqW3.
+rewrite ?ST0'. cancellate. rewrite -?GA -?ST0' HeqW1 HeqW2 HeqW3.
+remember (Z ij _ _) as Z1. remember (Z ik _ _) as Z2. remember (Z (swap_neq jk) _ _) as Z3.
+by rewrite -?GA /RHS ?HeqZ1 ?HeqZ2 ?HeqZ3. Qed.
