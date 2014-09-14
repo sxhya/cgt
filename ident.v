@@ -1,38 +1,15 @@
-Require Import ssreflect ssrnat ssrbool seq eqtype.
+Require Import ssreflect ssrnat ssrbool seq eqtype Ring.
 
-Context (ZZ : Type) (R : Set).
-Context (plus mul : R -> R -> R) (inv : R -> R) (zero unit : R).
+Module Import RingFacts := Ring.RingMT.
+Context (ZZ : Type) .
 Context (group_mul : ZZ -> ZZ -> ZZ) (groupinv : ZZ -> ZZ) (Id : ZZ).
 
-Notation "x + y" := (plus x y) : ring_scope.
-Notation "x * y" := (mul x y) : ring_scope.
-Notation "0" := zero : ring_scope.
-Notation "1" := unit : ring_scope.
-Notation "- x" := (inv x) : ring_scope.
 Notation "x ^-1" := (groupinv x) (at level 40).
 Notation "x .* y " := (group_mul x y) (at level 50, left associativity).
 
 Definition Comm (x y : ZZ) : ZZ := (x .* y .* x^-1 .* y^-1).
 Notation "[ ~ x1 , x2 , .. , xn ]" :=
   (Comm .. (Comm x1 x2) .. xn) (at level 29, left associativity).
-
-Open Scope ring_scope.
-
-Axiom plus_assoc: forall a b c, (a + b) + c = a + (b + c).
-Axiom mul_assoc: forall a b c, (a * b) * c = a * (b * c).
-Axiom dist_l: forall a b c, a * (b + c) = (a * b) + (a * c).
-Axiom dist_r: forall c a b, (a + b) * c = (a * c) + (b * c).
-Axiom plus_comm: forall a b, a + b = b + a.
-Axiom mul_comm: forall a b, a * b = b * a.
-Axiom mul_1_r: forall a, a * 1 = a.
-Axiom mul_1_l: forall a, 1 * a = a.
-Axiom plus_1_r: forall a, a + 0 = a.
-Axiom plus_1_l: forall a, 0 + a = a.
-Axiom inv_r: forall a, a + (-a) = 0.
-Axiom inv_l: forall a, (-a) + a = 0.
-Lemma inv_mul: forall a b, -a * b = -(a * b). Admitted.
-Lemma mul_inv: forall a b, a * (-b) = -(a * b). Admitted.
-Lemma invI: forall a, -(-a) = a. Admitted.
 
 Axiom GId: forall g, g .* Id = g.
 Axiom IdG: forall g, Id .* g = g.
