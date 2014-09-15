@@ -28,17 +28,31 @@ Corollary GI' g A: g .* ((g ^-1) .* A) = A. by rewrite -GA GI IdG. Qed.
 
 Corollary IG' g A: (g^-1) .* (g .* A) = A. by rewrite -GA IG IdG. Qed.
 
-Lemma GC: forall g3 g1 g2, g1 .* g3 = g2 .* g3 -> g1 = g2.
+Corollary GI'l g A: A .* g .* (g ^-1) = A. by rewrite GA GI GId. Qed.
+
+Corollary IG'l g A: A .* (g^-1) .* g = A. by rewrite GA IG GId. Qed.
+
+Lemma GCr: forall g3 g1 g2, g1 .* g3 = g2 .* g3 -> g1 = g2.
 intros. have: (g1 .* g3 .* g3 ^-1 = g2 .* g3 .* g3 ^-1) by rewrite H.
 by rewrite ?GA ?GI ?GId. Qed.
 
+Lemma GCl g3 g1 g2: g3 .* g1 = g3 .* g2 -> g1 = g2.
+intros. have: (g3^-1 .* g3 .* g1 = g3 ^-1 .* g3 .* g2) by rewrite ?GA H.
+by rewrite ?IG ?IdG. Qed.
+
 Lemma GIM: forall g1 g2, (g1 .* g2) ^-1 = g2 ^-1 .* g1 ^-1.
-intros. apply (GC (g1 .* g2)). by rewrite IG GA -(GA (g1 ^-1)) IG IdG IG. Qed.
+intros. apply (GCr (g1 .* g2)). by rewrite IG GA -(GA (g1 ^-1)) IG IdG IG. Qed.
 
 Lemma GII: forall g, g ^-1 ^-1 = g.
-intros. apply (GC (g^-1)). by rewrite IG GI. Qed.
+intros. apply (GCr (g^-1)). by rewrite IG GI. Qed.
 
-Lemma IdI: Id ^-1 = Id. apply (GC Id). by rewrite IG IdG. Qed.
+Lemma IdI: Id ^-1 = Id. apply (GCr Id). by rewrite IG IdG. Qed.
+
+Lemma eqIdP a b: a .* b = Id <-> a = b^-1.
+split; intros; [apply (GCr b); by rewrite IG| apply (GCr (b^-1)); by rewrite GA IdG GI GId]. Qed.
+
+Lemma rotate a b: a .* b = Id -> b .* a = Id.
+intros. apply eqIdP in H. by rewrite H GI. Qed.
 
 (* Conjugate elements *)
 
@@ -60,15 +74,18 @@ Definition Comm (x y : ZZ) : ZZ := (x .* y .* x^-1 .* y^-1).
 Notation "[ ~ x1 , x2 , .. , xn ]" :=
   (Comm .. (Comm x1 x2) .. xn) (at level 29, left associativity).
 
-Lemma Comm_inv: forall x y, [~ x, y] ^-1 = [~y, x].
+Ltac expand := rewrite /Comm /conj ?GIM ?GII.
+Ltac cancel := rewrite ?GI' ?GI'l ?IG' ?IG'l ?GI ?IG.
+Ltac cancellate := expand; rewrite ?GA; cancel.
+Ltac rotate := rewrite ?GA; apply rotate; rewrite ?GA.
+
+Lemma comm_inv: forall x y, [~ x, y] ^-1 = [~y, x].
 intros. by rewrite /Comm ?GIM ?GII -?GA. Qed.
 
-Lemma conj_com: forall a b, a ^ b = [~ b ^-1, a] .* a. 
-intros. rewrite /conj. apply (GC Id). by rewrite -{1}(IG a) -GA /Comm GII GId. Qed. 
+Lemma swap_comm a b: a .* b = [~ a, b] .* b .* a. by expand; cancel. Qed.
 
-Ltac expand := rewrite /Comm /conj ?GIM ?GII.
-Ltac cancel := rewrite ?GI' ?IG' ?GI ?IG.
-Ltac cancellate := expand; rewrite ?GA; cancel.
+Lemma conj_com: forall a b, a ^ b = [~ b ^-1, a] .* a. 
+intros. rewrite /conj. apply (GCr Id). by rewrite -{1}(IG a) -GA /Comm GII GId. Qed. 
 
 Lemma comm3 x y z: [~z, x, y]^ z = [~x, z^-1, y^z]. by cancellate. Qed.
 
