@@ -1,6 +1,6 @@
 Require Import ssreflect ssrnat ssrbool seq eqtype.
 
-Module RingMT.
+Module RingFacts.
 Variable (R : Type).
 Variable (plus mul : R -> R -> R) (inv : R -> R) (zero unit : R).
 
@@ -47,4 +47,4 @@ apply (canc_l (a * b)). by rewrite -dist_l ?inv_l mul_0_r. Qed.
 
 Lemma invI a: -(-a) = a.
 apply (canc_r (-a)). by rewrite inv_l inv_r. Qed.
-End RingMT.
+End RingFacts.
