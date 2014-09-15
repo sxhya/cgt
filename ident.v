@@ -54,9 +54,9 @@ by unlock Z; rewrite /conj ST0' ?GIM ?GA GII. Qed.
 Lemma R10 i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
 let RHS := X jk (- (b * c * (a * b))) .* X ik (a * b)
-.* (X (swap_neq ij) (- (b * (c * a * (b * c)))) .* X (swap_neq ik) (- (c * a * (b * c)))
-.* Z (swap_neq jk) (- (c * a)) (- b)) .* Z ik (- a * b) (- c)
-.* (X (swap_neq jk) (c * a) .* X ij a) in Z ij a (b * c) = RHS.
+.* (X ji (- (b * (c * a * (b * c)))) .* X ki (- (c * a * (b * c)))
+.* Z kj (- (c * a)) (- b)) .* Z ik (- a * b) (- c)
+.* (X kj (c * a) .* X ij a) in Z ij a (b * c) = RHS.
 intros.
 by rewrite 
  /Z -lock -(ST1 jk ji ki) /Comm ?conj_mul (conj_com (X ij a)) -ST0' ST1' mul_conj inv_mul mul_inv invI
@@ -81,7 +81,7 @@ Z ij a (b * c) =
 .* X ki (- (c * a * b * c)) .* Z kj (- (c * a)) (- b)) .* Z ik (- (a * b)) (- c) 
 .* X kj (c * a) .* X ij a.
 
-intros. move: (R10 i j k a b c ij ik jk). by rewrite -GA -?mul_assoc inv_mul. Qed.
+intros. move: (R10 i j k a b c ij ik jk) => /=. by rewrite -GA -?mul_assoc inv_mul. Qed.
 
 Corollary R1'' i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
