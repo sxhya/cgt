@@ -92,13 +92,15 @@ intros. rewrite (R1' i j k) /Z -?lock /conj /ji /ki /kj ?ST0' ?GII ?GA. by do 4 
 
 Corollary R1''' i j k (a b c : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
-Z ik (a * b) c = (Z kj (- (c * a)) (- b) .* X ki (c * a * b * c) .* X ji (b * c * a * b * c)
- .* X ik (- (a * b)) .* X jk (- (b * c * a * b)) .* Z ij a (- (b * c))
- .* X ij (- a) .* X kj (c * a)) ^-1. 
+Z ik (a * b) c =
+  X kj (- (c * a)) .* X ij a .* Z ij (- a) (- (b * c)) .* X jk (b * c * a * b)
+  .* X ik (a * b) .* X ji (- (b * c * a * b * c)) .* X ki (- (c * a * b * c))
+  .* Z kj (c * a) (- b). 
 
 intros. move: (R1'' i j k a b (-c) ij ik jk) => /=.
 rewrite -/ji -/ki -/kj ?inv_mul ?mul_inv ?inv_mul ?invI => H.
-apply /eqIdP. do 6 rotate. by rewrite -?GA. Qed.
+apply eqIdP in H. rewrite -?ST0' ?invI in H. rewrite -{} H.
+rewrite ?ST0' ?GA ?Zinv. do 2 cancel. by rewrite GId. Qed.
 
 (* Another (botched!) attempt of deriving Petrov's relation *)
 
