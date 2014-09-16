@@ -12,7 +12,7 @@ Import SteinbergGroup.
 
 Definition swap_neq {i j : nat}: i != j -> j != i. by rewrite eq_sym.  Defined.
 
-(* This statement is needed to get rid of proof-relevant nature of argument p of Z *) 
+(* This statement is needed to get rid of proof-relevant nature of parameter "p" of Z *) 
 Axiom swapI : forall {i j : nat} (p : i != j), swap_neq (swap_neq p) = p.
 
 Axiom X: forall {i j : nat}, (i != j) -> R -> ZZ.
@@ -101,6 +101,59 @@ intros. move: (R1'' i j k a b (-c) ij ik jk) => /=.
 rewrite -/ji -/ki -/kj ?inv_mul ?mul_inv ?inv_mul ?invI => H.
 apply eqIdP in H. rewrite -?ST0' ?invI in H. rewrite -{} H.
 rewrite ?ST0' ?GA ?Zinv. do 2 cancel. by rewrite GId. Qed.
+
+Corollary R12 i j k (a b : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z ik a b =
+  X kj (- (b * a)) .* X ij a .* Z ij (- a) (- (b)) .* X jk (b * a)
+  .* X ik (a) .* X ji (- (b * a * b)) .* X ki (- (b * a * b))
+  .* Z kj (b * a) (-(1)).
+intros. move: (R1''' i j k a 1 b ij ik jk) => /=.
+by rewrite ?mul_1_r ?mul_1_l -/ji -/ki -/kj. Qed.
+
+Lemma ST0'' {i j} a b (ij : i != j): X ij a ^ X ij b = X ij a.
+expand. by rewrite -ST0' -?ST0 plus_comm -plus_assoc inv_r plus_1_l. Qed.
+
+Lemma ST1'' {i j k} a b (ik : i != k) (kj : k!= j) (ij : i!=j): 
+ X ik a ^ X kj b = X ij (a * b) .* X ik a.
+by rewrite conj_com -ST0' ST1' mul_inv inv_mul invI. Qed.
+
+Lemma ST1''2 {i j k} a b {ij : i != j} {ki : k != i} (kj : k != j):
+X ij a ^ X ki b = X kj (- (b * a)) .* X ij a.
+by rewrite conj_com -ST0' ST1 inv_mul. Qed.
+
+Ltac rsimpl := rewrite ?mul_inv ?inv_mul ?mul_1_r ?mul_1_l -?mul_assoc ?invI.
+
+Section S1.
+Context (i j k l : nat) (a b c d : R) (ij : i != j) (ik : i != k) (jk : j != k)
+                                      (kl : k != l) (il : i != l) (jl : j != l).
+Let ji := (swap_neq ij). Let ki := (swap_neq ik). Let kj := (swap_neq jk).
+Let lk := (swap_neq kl). Let li := (swap_neq il). Let lj := (swap_neq jl).
+
+Lemma C1: (Z ij a b) ^ (X ij c) = X ik (c * b * a) .* X jk (- (b * a)) .* X ik a .* X kj (b * a * b * c)
+.* X ij (a * b * c) .* Z ik (- a) (- b) .* X kj (b * a) .* X ij a
+.* X kj (- (b * a * b * c)) .* X ki (- (b * a * b)) .* Z ji (- (b * a * b)) c
+.* X ij (c * b * a) .* X ik (- (c * b * a)) .* Z jk (b * a) (- (1)).
+by rewrite (R12 i k j a ) ?swapI -/ki -/ji ?mul_conj ST2'' // ST2' // Zdef' -/ji ST0'' ST1''2 ST1''
+        {1 3}/Z -?lock -/ki -/kj -?conj_mul (swap_comm (X ki (- b))) (swap_comm (X kj (- (1))))
+        ST1 ST2 // IdG ?conj_mul ST1'' ?inv_mul ?mul_inv ?invI -?mul_assoc mul_conj
+        ST0'' ST2'' // mul_conj ST1''2 Zdef ST1''2 mul_conj Zdef ST1'' -?GA; rsimpl. Qed.
+
+Lemma C2: (Z ij a b) ^ (X ji c) = (Z ij a (b + c)). by rewrite /Z -?lock -/ji -conj_mul ST0. Qed.
+
+Lemma C3: (Z ij a b) ^ (X jk c) = X jk (- (b * a * c)) .* X ik (a * c) .* Z ij a b.
+by rewrite /Z -lock -/ji -conj_mul swap_comm ST2 // 
+           IdG conj_mul ST1'' mul_conj ST1''2 Zdef; rsimpl. Qed.
+
+Lemma C4: (Z ij a b) ^ (X kj c) = X ki (c * b * a * b) .* X kj (c * b * a) .* Z ij a b.
+by rewrite /Z -lock -/ji -conj_mul swap_comm ST1' GA 
+        conj_mul ST1''2 ?mul_conj ?conj_mul ST0'' ST1'' ST2' // Zdef; rsimpl. Qed.
+
+Lemma C5: (Z ij a b) ^ (X kl c) = Z ij a b.
+by rewrite /Z -lock -/ji -conj_mul swap_comm ST2 // IdG 
+           conj_mul (conj_com (X ij a)) -ST0' ST2// IdG Zdef. Qed.
+
+End S1.
 
 (* Another (botched!) attempt of deriving Petrov's relation *)
 
