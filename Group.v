@@ -46,6 +46,12 @@ intros. apply (GCr (g1 .* g2)). by rewrite IG GA -(GA (g1 ^-1)) IG IdG IG. Qed.
 Lemma GII: forall g, g ^-1 ^-1 = g.
 intros. apply (GCr (g^-1)). by rewrite IG GI. Qed.
 
+Corollary GCl' g3 g1 g2: g1 = g2 -> g3 .* g1 = g3 .* g2.
+by move => ->. Qed.
+
+Corollary GCr' g3 g1 g2: g1 = g2 -> g1 .* g3 = g2 .* g3.
+by move => ->. Qed.
+
 Lemma IdI: Id ^-1 = Id. apply (GCr Id). by rewrite IG IdG. Qed.
 
 Lemma eqIdP a b: a .* b = Id <-> a = b^-1.
@@ -75,7 +81,7 @@ Notation "[ ~ x1 , x2 , .. , xn ]" :=
   (Comm .. (Comm x1 x2) .. xn) (at level 29, left associativity).
 
 Ltac expand := rewrite /Comm /conj ?GIM ?GII.
-Ltac cancel := rewrite ?GI' ?GI'l ?IG' ?IG'l ?GI ?IG.
+Ltac cancel := rewrite ?GI' ?GI'l ?IG' ?IG'l ?GI ?IG ?IdG ?GId.
 Ltac cancellate := expand; rewrite ?GA; cancel.
 Ltac rotate := rewrite ?GA; apply rotate; rewrite ?GA.
 
@@ -94,6 +100,8 @@ Lemma cmul_l x y z: [~ x .* y, z] = [~y, z] ^ (x^-1) .* [~x, z]. by cancellate. 
 Lemma cmul_r x y z: [~ x, y .* z] = [~x, y] .* [~x, z] ^ (y^-1). by cancellate. Qed.
 
 Lemma comm_conj x y z: [~ x, y] ^ z = [~x ^ z, y ^ z]. by cancellate. Qed.
+
+Lemma conj_comm' x y z : [ ~ y, z] ^ x = [ ~ x ^-1 .* y, z] .* [ ~ z, x ^-1]. by cancellate; cancel. Qed.
 
 Lemma comm_d1 x y: [~ x, y] = y ^ (x^-1) .* y^-1. by expand. Qed.
 
