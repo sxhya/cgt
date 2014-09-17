@@ -214,3 +214,10 @@ Axiom ZC4: (Z' ij a b) ^ (X kj c) = X' ki (c * b * a * b) .* X' kj (c * b * a) .
 Axiom ZC5: (Z' ij a b) ^ (X kl c) = Z' ij a b.
 
 End RelSteinberg.
+
+Lemma CorrZ1 {i j k l : nat} (a b c : R) 
+    (ij : i != j) (ik : i != k) (jk : j != k) (il : i != l) (kl : k != l) (jl : j!=l) :
+(Z' ij a b) ^ (X ij c) = (Z' ij a b) ^ (X ij c).
+set (ji := swap_neq ij). set (ki := swap_neq ik). set (li := swap_neq il).
+set (lk := swap_neq kl). set (kj := swap_neq jk). set (lj := swap_neq jl).
+rewrite {1}(@ZC1 i j k a b c ij ik jk) (@ZC1 i j l a b c ij il jl) -/li -/lj -/ji -/ki -/kj.
