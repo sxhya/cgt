@@ -134,16 +134,6 @@ Context (i j k l : nat) (a b c d r s: R) (ij : i != j) (ik : i != k) (jk : j != 
 Let ji := (swap_neq ij). Let ki := (swap_neq ik). Let kj := (swap_neq jk).
 Let lk := (swap_neq kl). Let li := (swap_neq il). Let lj := (swap_neq jl).
 
-Lemma C1: (Z ij a b) ^ (X ij c) = X ik (c * b * a) .* X jk (- (b * a)) .* X ik a .* X kj (b * a * b * c)
-.* X ij (a * b * c) .* Z ik (- a) (- b) .* X kj (b * a) .* X ij a
-.* X kj (- (b * a * b * c)) .* X ki (- (b * a * b)) .* Z ji (- (b * a * b)) c
-.* X ij (c * b * a) .* X ik (- (c * b * a)) .* Z jk (b * a) (- (1)).
-
-by rewrite (R12 i k j a ) ?swapI -/ki -/ji ?mul_conj ST2'' // ST2' // Zdef' -/ji ST0'' ST1''2 ST1''
-        {1 3}/Z -?lock -/ki -/kj -?conj_mul (swap_comm (X ki (- b))) (swap_comm (X kj (- (1))))
-        ST1 ST2 // IdG ?conj_mul ST1'' ?inv_mul ?mul_inv ?invI -?mul_assoc mul_conj
-        ST0'' ST2'' // mul_conj ST1''2 Zdef ST1''2 mul_conj Zdef ST1'' -?GA; rsimpl. Qed.
-
 (* Shorter and slicker relation taken from Petrov's Russian thesis (Lemma 7)*)
 
 Lemma C1': (Z ij a b) ^ (X ij c) = 
@@ -175,36 +165,3 @@ by rewrite /Z -lock -/ji -conj_mul swap_comm ST2 // IdG
            conj_mul (conj_com (X ij a)) -ST0' ST2// IdG Zdef. Qed.
 
 End S1.
-
-(* Another (botched!) attempt of deriving Petrov's relation *)
-
-Definition HW x y z := [~x, y, z^(y^-1)] .*  [~y, z, x^(z^-1)] .*  [~z, x, y^(x^-1)].
-
-Corollary HallWitt4 x y z: HW x y z = Id.
-move: (HallWitt'' (x^-1) (y^-1) (z^-1)). by rewrite /HW ?GII. Qed.
-
-Lemma R10' i j k (a b c : R): forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
-let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
-let RHS := 
-Z ij a (- (b * c)) .* X ij (- a) .* X ki (- (c * a * b * c))
-.* X kj (c * a * b * c * a) .* X kj (c * a)
-.* Z kj (- (c * a)) (- b) .* X ij (- (a * b * c * a))
-.* X ik (a * b * c * a * b) .* X ik (a * b) .* Z ik (- (a * b)) (- c)
-.* X jk (- (b * c * a * b)) .* X ji (b * c * a * b * c) in Id = RHS.
-
-intros. assert (A0: HW (X jk b) (X ki c) (X ij a) = Id). apply HallWitt4.
-move: A0. rewrite /HW ?ST1 ?conj_com -?ST0' ?GII ?invI ?ST1 ?cmul_r 
- ST1' (ST1' ik) (ST1' ji) ?comm_conj -?ST0' ?ST2' ?conj_com -?ST0' ?invI ?ST1 ?mul_inv ?inv_mul -?mul_assoc
- ?cmul_l // (ST1 ki) (ST1 ij) (ST1 jk) /conj -?ST0' ?invI.
-remember ([ ~ X ji (b * c), X ij a]) as W1. rewrite comm_d1 -?ST0' Zdef in HeqW1.
-remember ([ ~ X kj (c * a), X jk b]) as W2. rewrite comm_d2 -?ST0' Zdef' in HeqW2.
-remember ([ ~ X ik (a * b), X ki c]) as W3. rewrite comm_d2 -?ST0' Zdef in HeqW3.
-rewrite ?ST0'. cancellate. rewrite -?GA -?ST0' HeqW1 HeqW2 HeqW3.
-remember (Z ij _ _) as Z1. remember (Z ik _ _) as Z2. remember (Z (swap_neq jk) _ _) as Z3.
-by rewrite -?GA /RHS ?HeqZ1 ?HeqZ2 ?HeqZ3. Qed.
-
-Corollary A0 i j k (a b c : R): forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
-let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in Id = Id.
-intros. rewrite {1}(R10' i j k a b c ij ik jk) -inv_mul
-(R10 i j k a (-b) c ij ik jk) -?inv_mul ?mul_inv ?invI -mul_assoc -?GA ?swapI -/ji -/ki -/kj.
-rewrite ?ST0' ?GII ?GA. cancel. rewrite -?GA. rewrite (GA _ (X kj (c * a * b * c * a))) -ST0.
