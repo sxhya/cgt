@@ -8,7 +8,16 @@ Module Import GF := Group.GroupFacts SteinbergGroup.
 Module Import RF := Ring.RingFacts.
 Import SteinbergGroup.
 
-(* ********************************************** *)
+(* Reflection principle for (in)equality *)
+
+CoInductive eqneq (m n : nat) : bool -> bool -> Set :=
+ | Equal     of m == n : eqneq m n true false
+ | Different of m != n : eqneq m n false true.
+
+Lemma eqneqP m n: eqneq m n (m == n) (m != n).
+  by case A0: eq_op; rewrite /negb; constructor; rewrite A0. Qed.
+
+(*************************************************)
 
 Definition swap_neq {i j : nat}: i != j -> j != i. by rewrite eq_sym.  Defined.
 
@@ -55,12 +64,18 @@ intros. rewrite conj_com -ST0' ST2. by rewrite IdG. exact (swap_neq kj). exact k
 Corollary ST2''_swap: forall {i j k} {ki : k != i} {kj : k != j} (ij : i != j) a b, X ki a .* X kj b = X kj b .* X ki a.
 intros. rewrite -{2}(ST2'' ij a b). by cancellate. Qed.
 
+Lemma ST2''' {i j k l : nat} (ij : i != j) (kl : k != l) (jk : j != k) (il : i != l) r s:
+ X ij r ^ X kl s = X ij r. rewrite conj_com -ST0' ST2. by rewrite IdG. by exact (swap_neq il). by exact (swap_neq jk). Qed.
+
+(* These 2 axioms are needed to get rid of proof-relevant nature of parameter "p" of Z *) 
+
+Axiom swapI : forall {i j : nat} (p : i != j), swap_neq (swap_neq p) = p.
+
+Axiom irrelev : forall {i j : nat} (p q : i != j), p = q.
+
 (* Tits relative generators z_{ij}(a, r) *)
 
 Definition Z {i j : nat} (p : i != j) (r s : R) : ZZ := locked ((X p r) ^ (X (swap_neq p) s)).
-
-Axiom swapI : forall {i j : nat} (p : i != j), swap_neq (swap_neq p) = p.
-   (* This axiom is needed to get rid of proof-relevant nature of parameter "p" of Z *) 
 
 Lemma Zdef {i j} (p : i!= j) r s: (X (p) r) ^ (X (swap_neq p) s) = Z p r s. by unlock Z. Qed.
 
@@ -172,11 +187,62 @@ by rewrite /Z -lock -/ji -conj_mul swap_comm ST2 // IdG
            conj_mul (conj_com (X ij a)) -ST0' ST2// IdG Zdef. Qed.
 
 End S1.
+
+(* Lemmata about conjugation with Weyl elements *)
+
+Definition W {i j} (ij : i != j) := let ji := (swap_neq ij) in X ij (1) .* X ji (-(1)) .* X ij (1).
+
+Lemma Wconj1 i j k (ij : i != j) (jk : j != k) (ik : i != k) a:
+let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
+ (X ki a) ^ W ij = X kj a.
+intros. rewrite /W -/ji 2!conj_mul ST1'' mul_conj ST1'' ST2' // ?mul_conj ?ST1'' ST2' // (ST2''_swap) //.
+rsimpl. rewrite ?ST0'. cancel. rewrite (ST2''_swap) //. cancel. done. Qed. 
+
+Lemma Wconj1' i j k (ij : i != j) (jk : j != k) (ik : i != k) a:
+let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
+ (X jk a) ^ W ij = X ik (-a).
+intros. rewrite /W -/ji 2!conj_mul ST1''2 mul_conj ST1''2 ST2'' // ?mul_conj ?ST1''2 ST2'' // ST2'_swap //.
+rsimpl. rewrite ?ST0'. cancel. rewrite -?ST0' (ST2'_swap) // ?ST0'. cancel. done. Qed.
+
+Lemma Wconj2 i j k (ij : i != j) (jk : j != k) (ik : i != k) a:
+let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
+ (X ik a) ^ W ij = X jk a.
+intros. rewrite /W -/ji 2!conj_mul ST2'' // ST1''2 mul_conj ST2'' // ST1''2.
+rsimpl. rewrite (ST2'_swap) // ST0'. cancel. done. Qed.
+
+Lemma Wconj2' i j k (ij : i != j) (jk : j != k) (ik : i != k) a:
+let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
+ (X kj a) ^ W ij = X ki (-a).
+intros. rewrite /W -/ji 2!conj_mul ST2' // ST1'' mul_conj ST2' // ST1''.
+rsimpl. rewrite (ST2''_swap) // ?ST0'. cancel. done. Qed.
+
+Lemma Wconj3 i j k l (ij : i != j) (ik : i != k) (jk : j != k) (il : i != l) (kl : k != l) (jl : j!=l) a:
+let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
+ let li := swap_neq il in let lk := swap_neq kl in let lj := swap_neq jl in
+ (X kl a) ^ W ij = X kl a.
+intros. rewrite /W -/ji ?conj_mul. by do 3 rewrite ST2''' //. Qed.
+
+Lemma Wconj4 i j k (ij : i != j) (jk : j != k) (ik : i != k) a:
+let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
+ (X ji a) ^ W ij = X ij (-a).
+intros. rewrite -{1}(mul_1_r a) -(ST1 jk ji ki) comm_conj Wconj1 Wconj1' -/kj ST1. by rsimpl. Qed.
+
+Lemma Wconj4' i j k (ij : i != j) (jk : j != k) (ik : i != k) a:
+let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
+ (X ij a) ^ W ij = X ji (-a).
+intros. rewrite -{1}(mul_1_r a) -(ST1 ik ij kj) comm_conj Wconj2 Wconj2' -/ki ST1. by rsimpl. Qed.
+
 (* =========================================================== *)
 (*  Another Presentation for Relative Steinberg Group          *)
 (* =========================================================== *)
 
 Section RelSteinberg.
+
+(* Variable (I : Type).
+Variable (ii : I -> R).
+Coercion ii : I >-> R.
+
+Axiom ideal1: forall (a : I) (r : R), exists (a' : I), a * r = a'. *)
 
 Axiom Z': forall {i j : nat} (p : i != j) (r s : R), ZZ. (* Formal Generator *)
 
@@ -191,6 +257,8 @@ Let lk := (swap_neq kl). Let li := (swap_neq il). Let lj := (swap_neq jl).
 
 Axiom Z0: Z' ij (a + b) c = Z' ij a c .* Z' ij b c.
 Axiom Z0': (Z' ij a b) ^ (X' ji c) = Z' ij a (b + c).
+
+(* TODO: Use this relation to define morphism of Steinberg groups *)
 
 Axiom Z1: Z' ik (a * b) c =
   X' kj (- (c * a)) .* X' ij a .* Z' ij (- a) (- (b * c)) .* X' jk (b * c * a * b)
@@ -229,4 +297,11 @@ Lemma CorrZ1 {i j k l m : nat} (a b c : R)
 (Z' ij a b) ^ (X ij c) = (Z' ij a b) ^ (X ij c).
 set (ji := swap_neq ij). set (ki := swap_neq ik). set (li := swap_neq il). set (lk := swap_neq kl). set (kj := swap_neq jk).
 set (lj := swap_neq jl). set (mi := swap_neq im). set (mj := swap_neq jm). set (mk := swap_neq km). set (ml := swap_neq lm).
-rewrite {1}(@ZC1 i j k a b c ij ik jk) (@ZC1 i j l a b c ij il jl) -/li -/lj -/ji -/ki -/kj.
+rewrite {1}(@ZC1 i j k a b c ij ik jk) (@ZC1 i j l a b c ij il jl) -/li -/lj -/ji -/ki -/kj. Admitted.
+
+Lemma L00 i k j (ij : i != j) (ik : i != k) (jk : j != k) a b: 
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z' ij a b = X' jk (- (b * a)) .* X' ik a
+.* (X' ji (- (b * a * b)) .* X' ki (- (b * a * b))
+    .* Z' kj (- (b * a)) (- (1))) .* Z' ik (- a) (- b) .* X' kj (b * a) .* X' ij a.
+intros. rewrite -(mul_1_l b) (@Z1' i j k a (1) b). rsimpl. by rewrite -/ki -/kj -/ji. Qed.
