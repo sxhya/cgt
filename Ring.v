@@ -20,24 +20,24 @@ Axiom plus_comm: forall a b, a + b = b + a.
 Axiom mul_comm: forall a b, a * b = b * a.
 Axiom mul_1_r: forall a, a * 1 = a.
 Axiom mul_1_l: forall a, 1 * a = a.
-Axiom plus_1_r: forall a, a + 0 = a.
-Axiom plus_1_l: forall a, 0 + a = a.
+Axiom plus_0_r: forall a, a + 0 = a.
+Axiom plus_0_l: forall a, 0 + a = a.
 Axiom inv_r: forall a, a + (-a) = 0.
 Axiom inv_l: forall a, (-a) + a = 0.
 
 Lemma canc_r a b c: a + b = a + c -> b = c.
 intros. have: (-a+(a+b) = -a+(a+c)) by rewrite H.
-by rewrite -?plus_assoc ?inv_l ?plus_1_l. Qed.
+by rewrite -?plus_assoc ?inv_l ?plus_0_l. Qed.
 
 Lemma canc_l a b c: b + a = c + a -> b = c.
 intros. have: ((b+a)+(-a)) = (c+a)+(-a) by rewrite H.
-by rewrite ?plus_assoc ?inv_r ?plus_1_r. Qed.
+by rewrite ?plus_assoc ?inv_r ?plus_0_r. Qed.
 
 Lemma mul_0_r a: a * 0 = 0.
-apply (canc_r (a * 0)). by rewrite -dist_l ?plus_1_r. Qed.
+apply (canc_r (a * 0)). by rewrite -dist_l ?plus_0_r. Qed.
 
 Lemma mul_0_l a: 0 * a = 0.
-apply (canc_l (0 * a)). by rewrite -dist_r ?plus_1_l. Qed.
+apply (canc_l (0 * a)). by rewrite -dist_r ?plus_0_l. Qed.
 
 Lemma inv_mul a b: -a * b = -(a * b).
 apply (canc_r (a * b)). by rewrite -dist_r ?inv_r mul_0_l. Qed.

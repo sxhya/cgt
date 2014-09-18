@@ -17,13 +17,13 @@ Axiom X: forall {i j : nat}, (i != j) -> R -> ZZ.
 Axiom ST0: forall {i j : nat} (ij : (i != j)) r s, X ij (r + s) = X ij r .* X ij s.
 
 Lemma Xzero: forall {i j : nat} (ij : (i != j)), X ij 0 = Id.
-intros. apply (GCr (X ij 0)). by rewrite -{3}(plus_1_l 0) ST0 IdG. Qed.
+intros. apply (GCr (X ij 0)). by rewrite -{3}(plus_0_l 0) ST0 IdG. Qed.
 
 Lemma ST0': forall {i j : nat} (ij : (i != j)) r, X ij (- r) = (X ij r) ^-1.
 intros. apply (GCr (X ij r)). by rewrite -ST0 IG (inv_l) Xzero. Qed.
 
 Lemma ST0'' {i j} a b (ij : i != j): X ij a ^ X ij b = X ij a.
-expand. by rewrite -ST0' -?ST0 plus_comm -plus_assoc inv_r plus_1_l. Qed.
+expand. by rewrite -ST0' -?ST0 plus_comm -plus_assoc inv_r plus_0_l. Qed.
 
 Axiom ST1: forall {i j k : nat} (ij : (i != j)) (ik : (i != k)) (jk : (j != k)) r s,
  [~ X ij r , X jk s ] = X ik (r * s).
@@ -86,7 +86,7 @@ by rewrite
  /Z -lock -(ST1 jk ji ki) /Comm ?conj_mul (conj_com (X ij a)) -ST0' ST1' mul_conj inv_mul mul_inv invI
  (conj_com (X ij a)) -ST0' (ST1 ki kj ij) inv_mul 2!(mul_conj (X jk (-b))) Zdef' -(conj_mul) -/kj
  (swap_comm (X ki c))(ST1' jk ji ki) invI ?conj_mul (conj_com (X ik (a * b))) -ST0' ST1 inv_mul
- (mul_conj (X jk (- b))) {3}/conj -ST0' invI -2!ST0 (plus_comm b) plus_assoc inv_r plus_1_r
+ (mul_conj (X jk (- b))) {3}/conj -ST0' invI -2!ST0 (plus_comm b) plus_assoc inv_r plus_0_r
  (ST2' ij) (mul_conj (X ki c)) Zdef (conj_com _ (X ki c)) -ST0' ST1' invI mul_inv
  (conj_com (X ij a)) -ST0' invI ST1' -?GA ?mul_conj {1}/Z -lock
  -conj_mul -/ki -ST0 inv_r Xzero conjId Zdef (ST2' jk)
@@ -96,7 +96,7 @@ by rewrite
  {1}(swap_comm (X ki (-c))) ST1' inv_mul mul_inv invI (conj_com (X ij a)) -ST0' invI ST1
  (GA (X ji (- b * c))) conj_mul (ST2' kj)
  2!conj_mul (ST2'' ji) Zdef' (conj_com (X ki (- (c * a * (b * c))))) -ST0' invI ST1 mul_inv
- mul_conj (ST2' jk) /conj -ST0' invI -?ST0 plus_comm -plus_assoc inv_l plus_1_l //. Qed.
+ mul_conj (ST2' jk) /conj -ST0' invI -?ST0 plus_comm -plus_assoc inv_l plus_0_l //. Qed.
 
 Corollary R1' i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
@@ -182,8 +182,10 @@ Axiom Z': forall {i j : nat} (p : i != j) (r s : R), ZZ. (* Formal Generator *)
 
 Definition X' {i j : nat} (p : i != j) r := Z' p r (0).
 
-Context {i j k l : nat} (a b c d : R) (ij : i != j) (ik : i != k) (jk : j != k)
-                                      (kl : k != l) (il : i != l) (jl : j != l).
+Axiom Z2: forall i j k l (ij : i!=j) (kl : k!=l) a b c, Z' ij a b ^ Z' kl c 0 = Z' ij a b ^ X kl c.
+
+Context (i j k l : nat) {a b c d : R} {ij : i != j} {ik : i != k} {jk : j != k}
+                                      {kl : k != l} {il : i != l} {jl : j != l}.
 Let ji := (swap_neq ij). Let ki := (swap_neq ik). Let kj := (swap_neq jk).
 Let lk := (swap_neq kl). Let li := (swap_neq il). Let lj := (swap_neq jl).
 
@@ -215,9 +217,16 @@ Axiom ZC5: (Z' ij a b) ^ (X kl c) = Z' ij a b.
 
 End RelSteinberg.
 
-Lemma CorrZ1 {i j k l : nat} (a b c : R) 
-    (ij : i != j) (ik : i != k) (jk : j != k) (il : i != l) (kl : k != l) (jl : j!=l) :
+Lemma Zzero i j a (ij : i != j): Z' ij 0 a = Id.
+apply (GCr (Z' ij 0 a)). by rewrite IdG -Z0 plus_0_r. Qed.
+
+Lemma Z'Inv i j a b (ij : i != j): Z' ij (-a) b = (Z' ij a b)^-1.
+apply (GCr (Z' ij a b)). by rewrite -Z0 inv_l IG Zzero. Qed.
+
+Lemma CorrZ1 {i j k l m : nat} (a b c : R) 
+    (ij : i != j) (ik : i != k) (jk : j != k) (il : i != l) (kl : k != l) (jl : j!=l)
+    (im : i != m) (jm : j != m) (km : k != m) (lm : l != m) :
 (Z' ij a b) ^ (X ij c) = (Z' ij a b) ^ (X ij c).
-set (ji := swap_neq ij). set (ki := swap_neq ik). set (li := swap_neq il).
-set (lk := swap_neq kl). set (kj := swap_neq jk). set (lj := swap_neq jl).
+set (ji := swap_neq ij). set (ki := swap_neq ik). set (li := swap_neq il). set (lk := swap_neq kl). set (kj := swap_neq jk).
+set (lj := swap_neq jl). set (mi := swap_neq im). set (mj := swap_neq jm). set (mk := swap_neq km). set (ml := swap_neq lm).
 rewrite {1}(@ZC1 i j k a b c ij ik jk) (@ZC1 i j l a b c ij il jl) -/li -/lj -/ji -/ki -/kj.
