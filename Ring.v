@@ -48,6 +48,14 @@ apply (canc_l (a * b)). by rewrite -dist_l ?inv_l mul_0_r. Qed.
 Lemma invI a: -(-a) = a.
 apply (canc_r (-a)). by rewrite inv_l inv_r. Qed.
 
-Ltac rsimpl := rewrite ?mul_inv ?inv_mul ?mul_1_r ?mul_1_l -?mul_assoc ?invI.
+Lemma inv_zero: -0 = 0.
+apply (canc_l 0). by rewrite inv_l plus_0_r. Qed.
+
+Lemma inv_plus a b: -(a + b) = -a + -b.
+apply (canc_l (a + b)). 
+ by rewrite inv_l (plus_comm a) ?plus_assoc -(plus_assoc (-b)) inv_l plus_0_l inv_l. Qed.
+
+Ltac rsimpl := do 2 rewrite ?mul_0_r ?mul_0_l ?plus_0_l ?plus_0_r ?inv_zero
+               ?mul_inv ?inv_mul ?mul_1_r ?mul_1_l -?mul_assoc ?invI.
 
 End RingFacts.
