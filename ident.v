@@ -344,6 +344,17 @@ set (ji := swap_neq ij). set (ki := swap_neq ik). set (li := swap_neq il). set (
 set (lj := swap_neq jl). set (mi := swap_neq im). set (mj := swap_neq jm). set (mk := swap_neq km). set (ml := swap_neq lm).
 rewrite {1}(@ZC1 i j k a b c ij ik jk) (@ZC1 i j l a b c ij il jl) -/li -/lj -/ji -/ki -/kj. Admitted. *)
 
+Lemma ActionCorr1 a b c i j k 
+(ij : i != j) (ik : i != k) (jk : j != k):
+let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
+ Z' ij a b ^ (X ij c .* X ij (-(c))) = Id.
+intros. rewrite ?conj_mul (@ZC1 i j k a b c) -/ji -/kj -/ki -?GA
+ ?mul_conj XC3'// XC2 ZC3' ZC4' XC3 XC4// (XC1 i j k)// XC4'// -?GA.
+rsimpl. rewrite (XC4'_swap' i k j) // -X0 ?X0' inv_r X'zero GId.
+rewrite (XC4_swap' i j k) // ?X0' (plus_comm (c*b)) dist_r plus_assoc inv_r mul_1_l plus_0_r.
+rewrite (plus_comm _ 1) ?(dist_l _ (1)) ?mul_1_r ?plus_assoc ?mul_assoc ?inv_r.
+rewrite ?plus_0_r ?mul_assoc -{6}(mul_1_r a) -{16}(mul_1_r b) -?dist_l -{10 12}(mul_1_l a) -?mul_assoc -?dist_r.
+
 Lemma AdditivityCheck1 a b c d i j k 
 (ij : i != j) (ik : i != k) (jk : j != k):
 let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
@@ -386,3 +397,13 @@ rewrite (XC4_swap' i j k) // -?GA X0' -?mul_inv -?dist_l ?mul_inv (plus_assoc 1)
 rewrite -?mul_inv -plus_assoc -?dist_l ?mul_inv -plus_assoc inv_r plus_0_l.
 rewrite (plus_comm c) (dist_r (b*a)) ?mul_inv -plus_assoc inv_l plus_0_l.
 rsimpl.
+
+
+
+
+
+
+
+
+
+SearchAbout mul.
