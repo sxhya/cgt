@@ -157,8 +157,6 @@ rewrite -(swapI jk) C4 -/ji ?swapI -?mul_assoc
 rewrite ?mul_conj ST2'// ST1'' C2 inv_r C4' Zdef ST1''2; rsimpl.
 rewrite Zzero ?ST0'; cancel; rewrite -?ST0' -?GA //. Qed.
 
-(* This doesn't seem to follow from RG1 *)
-
 Lemma RG2 i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
 let RHS := X ki (- (c * a * b * c)) .* X kj (- (c * a)) .* X ji (- (b * c * a * b * c))
@@ -173,65 +171,121 @@ rewrite ?(mul_conj (X ki (-c))) C4' Zdef ST1''2.
 rewrite ?mul_conj ST2''// ST1''2 -(swapI jk) C2 C4 ?swapI Zdef' ST1''.
 by rsimpl; rewrite ?ST0'; cancel; rewrite -?ST0' inv_l Zzero -/kj -?GA. Qed.
 
-Lemma RG2' i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
-let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
-Z ij a (b * c) = X ij a .* X ik (a * b) .* Z kj (c * a) b .* Z ik (- (a * b)) (- c)
-.* X jk (b * c * a * b) .* X ji (- (b * c * a * b * c)) .* X kj (- (c * a))
-.* X ki (- (c * a * b * c)). intros.
-by rewrite -(invI a) Zinv (RG2 i j k (-a) b c) -/ji -/ki -/kj
-           ?GIM -?Zinv -?ST0' -?GA; rsimpl. Qed.
+(* ====== *)
 
-Corollary R1' i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
+Corollary RG1' i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
 Z ij a (b * c) = X jk (- (b * c * a * b)) .* X ik (a * b) .* (X ji (- (b * c * a * b * c))
 .* X ki (- (c * a * b * c)) .* Z kj (- (c * a)) (- b)) .* Z ik (- (a * b)) (- c) .* X kj (c * a) .* X ij a. 
 intros. by rewrite (RG1 i j k a b c) -/ji -/ki -/kj ?GA. Qed.
 
-Corollary R1'2 i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
+Corollary RG2' i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z ij a (b * c) = X ki (- (c * a * b * c)) .* X kj (- (c * a)) .* X ji (- (b * c * a * b * c))
+.* X jk (b * c * a * b) .* Z ik (- (a * b)) (- c) .* Z kj (c * a) b
+.* X ik (a * b) .* X ij a.
+intros. by rewrite (RG2 i j k a b c) -/ji -/ki -/kj. Qed.
+
+(* ====== *)
+
+Corollary RG1'' i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
 Z ij a (b * c) = X ij a .* X kj (c * a) .* Z ik (- (a * b)) (- c) .* Z kj (- (c * a)) (- b)
 .* X ki (- (c * a * b * c)) .* X ji (- (b * c * a * b * c)) .* X ik (a * b) .* X jk (- (b * c * a * b)).
 
-intros. replace a with (- (-a)); [| by rewrite invI]. 
-by rewrite Zinv (R1' i j k (-a) b c) -/ji -/ki -/kj; 
+intros. by rewrite -{1}(invI a) Zinv (RG1' i j k (-a) b c) -/ji -/ki -/kj; 
  expand; rewrite -?ST0' -?Zinv -?GA; rsimpl. Qed.
 
-Corollary R1'' i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
+Corollary RG2'' i j k a b c: forall (ij : i!=j) (ik : i!=k) (jk : j!=k),
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
-Z ij a (b * c) .* X ij (- a) .* X kj (- (c * a)) .*  Z ik (a * b) (- c) .* Z kj (c * a) (- b) .* 
-  X ki (c * a * b * c) .* X ji (b * c * a * b * c) .* X ik (- (a * b)) .* X jk (b * c * a * b) = Id. 
+Z ij a (b * c) = X ij a .* X kj (c * a) .* Z ik (- (a * b)) (- c) .* Z kj (- (c * a)) (- b)
+.* X ki (- (c * a * b * c)) .* X ji (- (b * c * a * b * c)) .* X ik (a * b) .* X jk (- (b * c * a * b)).
+intros. by rewrite -{1}(invI a) Zinv (RG1' i j k (-a) b c) -/ji -/ki -/kj; 
+ expand; rewrite -?ST0' -?Zinv -?GA; rsimpl. Qed.
 
-intros. rewrite (R1' i j k) /Z -?lock /conj /ji /ki /kj ?ST0' ?GII ?GA. by do 4 cancel. Qed.
+(* ====== *)
 
-Corollary R1''' i j k (a b c : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
+Corollary RG1bis i j k (a b c : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
-Z ik (a * b) c =
-  X kj (- (c * a)) .* X ij a .* Z ij (- a) (- (b * c)) .* X jk (b * c * a * b)
-  .* X ik (a * b) .* X ji (- (b * c * a * b * c)) .* X ki (- (c * a * b * c))
-  .* Z kj (c * a) (- b). 
+Z ij (a * b) c =  X jk (- (c * a)) .* X ik a .* Z ik (- a) (- (b * c)) .* X kj (b * c * a * b)
+               .* X ij (a * b) .* X ki (- (b * c * a * b * c)) .* X ji (- (c * a * b * c)) .* Z jk (c * a) (- b). 
 
-intros. move: (R1'' i j k a b (-c) ij ik jk) => /=.
-rewrite -/ji -/ki -/kj ?inv_mul ?mul_inv ?inv_mul ?invI => H.
-apply eqIdP in H. rewrite -?ST0' ?invI in H. rewrite -{} H.
-rewrite ?ST0' ?GA ?Zinv. by do 2 cancel. Qed.
+intros. apply eqIdP'. rewrite ?GIM -?Zinv -?ST0' ?invI -?GA -?mul_inv.
+by rewrite (RG1' i k j a b (-c)) ?swapI -/ji -/ki -/kj; rsimpl; rewrite ?ST0' ?Zinv ?GA; do 2 cancel. Qed.
+
+Corollary RG2bis i j k (a b c : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z ij (a * b) c =  Z jk (- (c * a)) b .* X ij (a * b) .* X ik a .* Z ik (- a) (- (b * c))
+.* X ji (- (c * a * b * c)) .* X jk (c * a) .* X ki (- (b * c * a * b * c)) .* X kj (- (b * c * a * b)). 
+
+intros. move: (RG2' i k j a b (-c) ik ij kj) => /=; rewrite ?swapI -/ji -/ki -/kj -?GA ?Zinv; rsimpl.
+move /eqIdP''; rewrite ?GIM -?ST0' -?Zinv ?invI. do 4 (move /rotate; rewrite ?GA). move /eqIdP => ->.
+by rewrite ?GIM -?Zinv -?ST0' ?invI ?GA. Qed.
+
+(* ====== *)
 
 Corollary R12 i j k (a b : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
 Z ij a b = X jk (- (b * a)) .* X ik a .* Z ik (- a) (- b) .* X kj (b * a) .* X ij a
 .* X ki (- (b * a * b)) .* X ji (- (b * a * b)) .* Z jk (b * a) (- (1)).
-intros. move: (R1''' i k j a 1 b ik ij kj) => /=.
+
+intros. move: (RG1bis i j k a 1 b ij ik jk) => /=.
 by rewrite ?swapI -/ji -/ki -/kj; rsimpl. Qed.
+
+Corollary R22 i j k (a b : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z ij a b = Z jk (- (b * a)) 1 .* X ij a .* X ik a .* Z ik (- a) (- b)
+.* X ji (- (b * a * b)) .* X jk (b * a) .* X ki (- (b * a * b))
+.* X kj (- (b * a)).
+
+intros. move: (RG2bis i j k a 1 b ij ik jk) => /=.
+by rewrite ?swapI -/ji -/ki -/kj; rsimpl. Qed.
+
+(* ====== *)
 
 Corollary R12' i j k (a b : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
 Z ij a b = Z jk (b * a) (- (1)) .* X ji (- (b * a * b)) .* X ki (- (b * a * b))
 .* X ij a .* X kj (b * a) .* Z ik (- a) (- b) .* X ik a .* X jk (- (b * a)).
-intros. move: (R1''' i k j (-a) 1 b ik ij kj) => /=.
+
+intros. move: (RG1bis i j k (-a) 1 b ij ik jk) => /=.
 rewrite ?swapI -/ji -/ki -/kj; rsimpl.
 rewrite Zinv. rewrite -{2}(GII (Z ij a b)) => ->.
 by rewrite ?GIM -?Zinv -?ST0' ?invI -?GA //. Qed.
 
+Corollary R12'' i j k (a b : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z ij a b = X jk (b * a) .* X ik (- a) .* Z ik a b .* X kj (- (b * a)) .* X ij a
+.* X ki (b * a * b) .* X ji (- (b * a * b)) .* Z jk (- (b * a)) 1.
 
+intros. move: (RG1bis i j k (-a) (-(1)) b ij ik jk) => /=.
+rewrite ?swapI -/ji -/ki -/kj; rsimpl.
+rewrite Zinv. rewrite -{2}(GII (Z ij a b)) => ->.
+by rewrite ?GIM -?Zinv -?ST0' ?invI -?GA //. Qed.
+
+Corollary R22'  i j k (a b : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z ij a b = X kj (- (b * a)) .* X ki (- (b * a * b)) .* X jk (b * a)
+.* X ji (- (b * a * b)) .* Z ik (- a) (- b) .* X ik a .* X ij a
+.* Z jk (- (b * a)) 1.
+
+intros. move: (RG2bis i j k (-a) 1 b ij ik jk) => /=.
+rewrite ?swapI -/ji -/ki -/kj; rsimpl.
+rewrite Zinv. rewrite -{2}(GII (Z ij a b)) => ->.
+by rewrite ?GIM -?Zinv -?ST0' ?invI -?GA //. Qed.
+
+Corollary R22'' i j k (a b : R) (ij : i!=j) (ik : i!=k) (jk : j!=k):
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z ij a b = Z jk (b * a) (- (1)) .* X ij a .* X ik (- a) .* Z ik a b
+.* X ji (- (b * a * b)) .* X jk (- (b * a)) .* X ki (b * a * b)
+.* X kj (b * a).
+
+intros. move: (RG2bis i j k (-a) (-(1)) b ij ik jk) => /=.
+rewrite ?swapI -/ji -/ki -/kj; rsimpl.
+rewrite -{2}(GII (Z ij a b)) => ->.
+by rewrite ?GIM -?Zinv -?ST0' ?invI -?GA //. Qed.
+
+(* ====== *)
 
 Lemma StrangeL {i j k} {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j} a b c:
 [ ~ X ik ((c * b + 1) * a) .* X jk (- (b * a)), X ki b .* X kj (b * c + 1)] ^ (X ij (-c)) = Z ij a b.
