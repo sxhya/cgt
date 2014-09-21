@@ -57,6 +57,12 @@ Lemma IdI: Id ^-1 = Id. apply (GCr Id). by rewrite IG IdG. Qed.
 Lemma eqIdP a b: a .* b = Id <-> a = b^-1.
 split; intros; [apply (GCr b); by rewrite IG| apply (GCr (b^-1)); by rewrite GA IdG GI GId]. Qed.
 
+Lemma eqIdP' a b: a .* (b^-1) = Id -> a = b.
+move /(GCr' b). by rewrite GA IG GId IdG. Qed.
+
+Lemma eqIdP'' a b: a = b -> a .* (b^-1) = Id.
+move /(GCr' (b^-1)). by rewrite GI. Qed.
+
 Lemma rotate a b: a .* b = Id -> b .* a = Id.
 intros. apply eqIdP in H. by rewrite H GI. Qed.
 
