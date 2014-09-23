@@ -73,6 +73,8 @@ Axiom swapI : forall {i j : nat} (p : i != j), swap_neq (swap_neq p) = p.
 
 Axiom irrelev : forall {i j : nat} (p q : i != j), p = q.
 
+
+
 (* Tits relative generators z_{ij}(a, r) *)
 
 Definition Z {i j : nat} (p : i != j) (r s : R) : ZZ := locked ((X p r) ^ (X (swap_neq p) s)).
@@ -93,6 +95,32 @@ by unlock Z; rewrite /conj ST0' ?GIM ?GA GII. Qed.
 
 Lemma Zzero {i j} (ij : i != j) (s : R): Z ij s 0 = X ij s.
 by rewrite /Z -?lock Xzero /conj IdI IdG GId. Qed.
+
+Lemma Zd i j (ij : i!=j) (ji : j!=i) a b:
+ X ji (- a) .* X ij b .* X ji a = Z ij b a.
+by rewrite /Z -lock (irrelev (swap_neq ij) ji) /conj ST0'. Qed.
+
+Lemma Zd' i j (ij : i!=j) (ji : j!=i) a b:
+ X ji (a) .* X ij b .* X ji (-a) = Z ij b (-a).
+move: (Zd i j ij ji (-a) b). by rewrite ?invI. Qed.
+
+Corollary Zd2 i j (ij : i!=j) (ji : j!=i) a b g:
+  g .* X ji (- a) .* X ij b .* X ji a = g .* Z ij b a.
+by rewrite (GA g) GA Zd. Qed.
+
+Corollary Zd2' i j (ij : i!=j) (ji : j!=i) a b g:
+  g .* X ji (a) .* X ij b .* X ji (-a) = g .* Z ij b (-a).
+move: (Zd2 i j ij ji (-a) b g). by rewrite ?invI. Qed.
+
+Ltac collectZ := rewrite -?GA -?ST0' ?invI ?Zdef'' ?Zd2 ?Zd2' ?Zd ?Zd'.
+
+Lemma ZX {i j} (ij : i!=j) a b: let ji := swap_neq ij in
+Z ij a b .* X ij (-a) = X ji (- b) .* X ji b ^ X ij (- a).
+by intros; rewrite /Z -?lock -/ji ST0' comm_d1'' comm_d2 GII -?ST0'. Qed.
+
+Lemma ZX' {i j} (ij : i!=j) a b g: let ji := swap_neq ij in
+g .* Z ij a b .* X ij (-a) = g .* X ji (- b) .* X ji b ^ X ij (- a).
+intros. by rewrite ?(GA g) ZX. Qed.
 
 Section S0.
 
@@ -182,35 +210,22 @@ rewrite ?Xzero. by rewrite /conj IdI IdG GId. Qed.
 
 (* Petrov's relation and its variations *)
 
-Lemma Zd i j (ij : i!=j) (ji : j!=i) a b:
- X ji (- a) .* X ij b .* X ji a = Z ij b a.
-by rewrite /Z -lock (irrelev (swap_neq ij) ji) /conj ST0'. Qed.
-
-Lemma Zd' i j (ij : i!=j) (ji : j!=i) a b:
- X ji (a) .* X ij b .* X ji (-a) = Z ij b (-a).
-move: (Zd i j ij ji (-a) b). by rewrite ?invI. Qed.
-
-Corollary Zd2 i j (ij : i!=j) (ji : j!=i) a b g:
-  g .* X ji (- a) .* X ij b .* X ji a = g .* Z ij b a.
-by rewrite (GA g) GA Zd. Qed.
-
-Corollary Zd2' i j (ij : i!=j) (ji : j!=i) a b g:
-  g .* X ji (a) .* X ij b .* X ji (-a) = g .* Z ij b (-a).
-move: (Zd2 i j ij ji (-a) b g). by rewrite ?invI. Qed.
-
-Ltac collectZ := rewrite -?GA -?ST0' ?invI ?Zdef'' ?Zd2 ?Zd2' ?Zd ?Zd'.
 Ltac rotate1 := rewrite ?GA; move /rotate; rewrite ?GA.
+Ltac simplify := expand; rewrite -?Zinv -?ST0' ?invI -?GA; rsimpl.
 
 (* Petrov relations can be deduced from the following 6-relation (which is not inside relative Steinberg subgroup) *)
 
 Lemma SixRelation i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
-Z ij (a * b) c = X ki (- (b * c)) .* Z jk (- (c * a)) b .* X ij (a * b) .* Z ki (b * c) (- a) .* X jk (c * a).
+X ki (- (b * c)) .* Z jk (c * a) b .* X ij (- (a * b)) .* Z ki (b * c) a
+.* X jk (- (c * a)) .* Z ij (a * b) c = Id.
 
-intros. move: (HallWitt'' (X ik (-a)) (X ji c) (X kj b)).
+intros. move: (HallWitt'' (X ik (a)) (X ji c) (X kj b)).
 rewrite -?ST0' ?invI. do 3 rewrite ST1' ST1''; rsimpl.
-expand. conjugate_r (X jk ((c*a))). collectZ. rewrite ?ST0'; cancel.
-move /eqIdP. by rewrite -Zinv ?invI -ST0' => <-. Qed.
+expand. conjugate_r (X jk (-(c*a))). collectZ. rewrite ?ST0'; cancel.
+by rewrite -?ST0'. Qed.
+
+(* =========================== *)
 
 Lemma RG1 i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in

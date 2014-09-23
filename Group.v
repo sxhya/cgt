@@ -89,13 +89,17 @@ Notation "[ ~ x1 , x2 , .. , xn ]" :=
 Ltac expand := rewrite /Comm /conj ?GIM ?GII.
 Ltac cancel := rewrite ?GI' ?GI'l ?IG' ?IG'l ?GI ?IG ?IdG ?GId.
 Ltac cancellate := expand; rewrite ?GA; cancel; rewrite -?GA.
-Ltac rotate := rewrite ?GA; apply rotate; rewrite ?GA.
+Ltac rotate := rewrite ?GA; apply rotate; rewrite -?GA.
 Ltac conjugate_r M := rewrite -?GA; move /(GCl' (M ^-1)) /(GCr' M); cancellate.
 Ltac conjugate_l M := rewrite -?GA; move /(GCl' M) /(GCr' (M^-1)); cancellate.
 
 Lemma Gswap a b: a .* b = b .* a ^ b. by cancellate. Qed.
 
+Lemma Gswap2 a b: a .* b = b ^ (a^-1) .* a. by cancellate. Qed.
+
 Lemma Gswap' a b g: g .* a .* b = g .* b .* a ^ b. by cancellate. Qed.
+
+Lemma Gswap2' a b g: g .* a .* b = g .* b ^ (a^-1) .* a. by cancellate. Qed.
 
 Lemma comm_inv: forall x y, [~ x, y] ^-1 = [~y, x].
 intros. by rewrite /Comm ?GIM ?GII -?GA. Qed.
@@ -121,8 +125,9 @@ Lemma comm_d2 x y: [~ x, y] = x .* (x^-1) ^ (y^-1). by cancellate. Qed.
 
 Lemma comm_d1' x y g: g .* [ ~ x, y] = g .* y ^ (x ^-1) .* y ^-1. by cancellate. Qed.
 
-Lemma comm_d2' x y g: g .* [~ x, y] = g .* x .* (x^-1) ^ (y^-1). by cancellate. Qed.
+Lemma comm_d1'' x y: x ^ y .* x^-1 = [~ y^-1, x]. by rewrite comm_d1; cancellate. Qed.
 
+Lemma comm_d2' x y g: g .* [~ x, y] = g .* x .* (x^-1) ^ (y^-1). by cancellate. Qed.
 (* Variations of Hall-Witt identity*)
 
 Lemma HallWitt x y z: 
