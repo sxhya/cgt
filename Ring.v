@@ -5,6 +5,7 @@ Variable (R : Type).
 Variable (plus mul : R -> R -> R) (inv : R -> R) (zero unit : R).
 
 Notation "x + y" := (plus x y) : ring_scope.
+Notation "x - y" := (plus x (inv y)) : ring_scope.
 Notation "x * y" := (mul x y) : ring_scope.
 Notation "0" := zero : ring_scope.
 Notation "1" := unit : ring_scope.

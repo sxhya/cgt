@@ -1,48 +1,22 @@
 Require Import ssreflect ssrnat ssrbool seq eqtype Ring Group ident.
+Import Ring.RingFacts SteinbergGroup GF.
 
-Import Ring.RingFacts.
-Import SteinbergGroup.
-Import GF.
-Open Scope ring_scope.
+Section RelSteinbergAxioms.
 
-(* =========================================================== *)
-(*  Another Presentation for Relative Steinberg Group          *)
-(* =========================================================== *)
-
-Section RelSteinberg.
-
-Axiom Z': forall {i j : nat} (p : i != j) (r s : R), ZZ. (* Formal Generator *)
-
+Parameter Z': forall {i j : nat} (p : i != j) (r s : R), ZZ.
 Definition X' {i j : nat} (p : i != j) r := Z' p r (0).
 
-Axiom Z2: forall i j k l (ij : i!=j) (kl : k!=l) a b c, Z' ij a b ^ Z' kl c 0 = Z' ij a b ^ X kl c.
+Context (i j k l : nat) {a b c d : R} 
+        {ij : i != j} {ik : i != k} {jk : j != k} {kl : k != l} {il : i != l} {jl : j != l}
+        {ji : j != i} {ki : k != i} {kj : k != j} {lk : l != k} {li : l != i} {lj : l != j}.
 
-Context (i j k l : nat) {a b c d : R} {ij : i != j} {ik : i != k} {jk : j != k}
-                                      {kl : k != l} {il : i != l} {jl : j != l}.
-
-Context (ji : j != i) (ki : k != i) (kj : k != j)
-        (lk : l != k) (li : l != i) (lj : j != l).
-
-Axiom Z0: Z' ij (a + b) c = Z' ij a c .* Z' ij b c.
-Axiom Z0': (Z' ij a b) ^ (X' ji c) = Z' ij a (b + c).
-
-(* TODO: Use this relation to define morphism of Steinberg groups *)
-
-Axiom Z1: Z' ik (a * b) c =
-  X' kj (- (c * a)) .* X' ij a .* Z' ij (- a) (- (b * c)) .* X' jk (b * c * a * b)
-  .* X' ik (a * b) .* X' ji (- (b * c * a * b * c)) .* X' ki (- (c * a * b * c))
-  .* Z' kj (c * a) (- b). 
-
-Axiom Z1': Z' ij a (b * c) = 
-   X' jk (- (b * c * a * b)) .* X' ik (a * b) .* (X' ji (- (b * c * a * b * c))
-.* X' ki (- (c * a * b * c)) .* Z' kj (- (c * a)) (- b)) .* Z' ik (- (a * b)) (- c) 
-.* X' kj (c * a) .* X' ij a.
+(* Definition of the action of the Steinberg group on relative generators *)
 
 Axiom ZC1: (Z' ij a b) ^ (X ij c) = 
-X' ik ((c * b + 1) * a) .* X' jk (- (b * a))
-.* X' ki (- ((b * c + 1) * b * a * b)) .* X' ji (- (b * a * b)) .* Z' jk (b * a) (- (b * c + 1)) 
-.* X' kj (b * (c * b + 1) * a * (b * c + 1)) .* X' ij ((c * b + 1) * a * (b * c + 1)) .* Z' ik (- ((c * b + 1) * a)) (- b).
-
+X' ik ((c * b + 1) * a) .* X' jk (-(b * a)) .*
+X' ki (- ((b * c + 1) * b * a * b)) .* X' ji (-(b * a * b)) .* Z' jk (b * a) (-(b * c+1)) .*
+X' kj (b * (c * b + 1) * a * (b * c + 1)) .* X' ij ((c * b + 1) * a * (b * c + 1)) .* Z' ik (-((c * b + 1) * a)) (-b).
+ 
 Axiom ZC2: (Z' ij a b) ^ (X ji c) = Z' ij a (b + c).
 
 Axiom ZC3: (Z' ij a b) ^ (X jk c) = X' jk (- (b * a * c)) .* X' ik (a * c) .* Z' ij a b.
@@ -55,7 +29,20 @@ Axiom ZC4': (Z' ij a b) ^ (X ik c) = X' jk (- (b * a * b * c)) .* X' ik (a * b *
 
 Axiom ZC5: (Z' ij a b) ^ (X kl c) = Z' ij a b.
 
-End RelSteinberg.
+(* Definition of Relations between relative generators *)
+
+Axiom Z0: Z' ij (a + b) c = Z' ij a c .* Z' ij b c.
+Axiom Z1: (Z' ij a b) ^ (X' ji c) = Z' ij a (b + c).
+
+Axiom Z2: Z' ij a b ^ X' kl c = Z' ij a b ^ X kl c.
+
+Axiom Z3: Z ij (a * b) c =  X jk (- (c * a)) .* X ik a .* Z ik (- a) (- (b * c)) .* X kj (b * c * a * b)
+               .* X ij (a * b) .* X ki (- (b * c * a * b * c)) .* X ji (- (c * a * b * c)) .* Z jk (c * a) (- b). 
+
+Axiom Z3': Z ij (a * b) c =  Z jk (- (c * a)) b .* X ij (a * b) .* X ik a .* Z ik (- a) (- (b * c))
+.* X ji (- (c * a * b * c)) .* X jk (c * a) .* X ki (- (b * c * a * b * c)) .* X kj (- (b * c * a * b)). 
+
+End RelSteinbergAxioms.
 
 Lemma Z'zero i j a (ij : i != j): Z' ij 0 a = Id.
 apply (GCr (Z' ij 0 a)). by rewrite IdG -Z0 plus_0_r. Qed.
@@ -68,11 +55,10 @@ apply (GCr (Z' ij a b)). by rewrite -Z0 inv_l IG Z'zero. Qed.
 Corollary X'Inv i j a (ij : i != j): X' ij (-a) = (X' ij a)^-1. by rewrite /X' Z'Inv. Qed.
 
 Section XCorollaries.
-Context (i j k l : nat) {a b c d : R} {ij : i != j} {ik : i != k} {jk : j != k}
-                                      {kl : k != l} {il : i != l} {jl : j != l}.
 
-Context (ji : j != i) (ki : k != i) (kj : k != j)
-        (lk : l != k) (li : l != i) (lj : j != l).
+Context (i j k l : nat) {a b c d : R} 
+        {ij : i != j} {ik : i != k} {jk : j != k} {kl : k != l} {il : i != l} {jl : j != l}
+        {ji : j != i} {ki : k != i} {kj : k != j} {lk : l != k} {li : l != i} {lj : l != j}.
 
 Ltac ZX E := rewrite /X'; rewrite E; rewrite /X'; rsimpl; rewrite ?Z'zero; cancel.
 
@@ -103,21 +89,13 @@ intros. by rewrite GA XC4'_swap ?GA. Qed.
 
 End XCorollaries.
 
+Section MainSection.
+
 Corollary ZC3_swap{i j k} {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j} a b c:
- (Z' ij a b) .* (X' jk c) = (X' jk ((1 + -(b * a)) * c)) .* X' ik (a * c) .* Z' ij a b.
+ (Z' ij a b) .* (X' jk c) = (X' jk ((1 - b * a) * c)) .* X' ik (a * c) .* Z' ij a b.
 apply (GCl ((X' jk c)^-1)). rewrite -?GA. replace (X' jk c ^-1 .* Z' ij a b .* X' jk c) with (Z' ij a b ^ X' jk c); try by expand.
 by rewrite {1}/X' Z2 ZC3 dist_r mul_1_l X0; cancellate; rsimpl. Qed.
 
-Corollary Z11' {i j k} {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j} a b:
-Z' ij a b =  X' jk (- (b * a * b)) .* X' ik (a * b) .* (X' ji (- (b * a * b))
-.* X' ki (- (a * b)) .* Z' kj (- (a)) (- b)) .* Z' ik (- (a * b)) (- (1)) 
-.* X' kj (a) .* X' ij a.
-by rewrite -{1}(mul_1_r b) (Z1' i j k ji ki kj); rsimpl. Qed.
-
-Corollary Z12' {i j} k {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j} a b:
- Z' ij a b = X' jk (- (b * a)) .* X' ik a .* Z' ik (- a) (- b) .* X' kj (b * a)
-  .* X' ij (a) .* X' ki (- (b * a * b)) .* X' ji (- (b * a * b)) .* Z' jk (b * a) (- (1)).
-by rewrite -{1}(mul_1_r a) (Z1 i k j ki ji jk); rsimpl. Qed.
 
 (* Key identity to be proved *)
 Lemma Q1 a b c i j k (ij : i != j) (ik : i != k) (jk : j != k):

@@ -94,6 +94,19 @@ by unlock Z; rewrite /conj ST0' ?GIM ?GA GII. Qed.
 Lemma Zzero {i j} (ij : i != j) (s : R): Z ij s 0 = X ij s.
 by rewrite /Z -?lock Xzero /conj IdI IdG GId. Qed.
 
+Section S0.
+
+Context (i j k l : nat) (a b c d : R) (ij : i != j) (ik : i != k) (jk : j != k)
+                                      (kl : k != l) (il : i != l) (jl : j != l).
+Let ji := (swap_neq ij). Let ki := (swap_neq ik). Let kj := (swap_neq jk).
+Let lk := (swap_neq kl). Let li := (swap_neq il). Let lj := (swap_neq jl).
+
+Lemma C3': (Z ij a b) ^ (X ki c) = X ki (- (c * a * b)) .* X kj (- (c * a)) .* Z ij a b.
+by rewrite /Z -lock -/ji -conj_mul swap_comm ST2 //; cancel;
+rewrite conj_mul ST1''2  mul_conj ST1'' Zdef; rsimpl. Qed.
+
+End S0.
+
 Section S1.
 Context (i j k l : nat) (a b c d : R) (ij : i != j) (ik : i != k) (jk : j != k)
                                       (kl : k != l) (il : i != l) (jl : j != l).
@@ -102,29 +115,38 @@ Let lk := (swap_neq kl). Let li := (swap_neq il). Let lj := (swap_neq jl).
 
 (* Shorter and slicker relation taken from Petrov's Russian thesis (Lemma 7)*)
 
+Lemma C1: (Z ij a b) ^ (X ij c) = 
+   X kj (a * (b * c + 1)) .* X ki (a * b) .*
+   X ik (- ((c * b + 1) * a * (b * c + 1) * b)) .* X ij ((c * b + 1) * a * (b * c + 1)) .* Z kj (- (a * (b * c + 1))) (- b) .*
+   X jk (- (b * a * b * (c * b + 1))) .* X ji (- (b * a * b)) .* Z ki (- (a * b)) (c * b + 1).
+
+rewrite /Z -lock -conj_mul -/ji. 
+move: (ST1' ik ij kj a (-(1))); rsimpl => <-.
+rewrite conj_mul comm_conj ST1'' ST1''2
+        comm_conj ?mul_conj ST2'' // ST2' // ST1'' ST1''2; rsimpl.
+rewrite ST2''_swap // ?GA -ST0 ST2'_swap // -GA -ST0 -{3}(mul_1_r a) mul_assoc -dist_l.
+rewrite comm_d2 ?GIM -?ST0' inv_plus ?invI mul_conj {1}ST2''_swap //.
+rewrite ?conj_mul Zdef'' ST1''2 ?mul_conj.
+by rewrite ST1'' ?Zdef'' -(swapI ik) C3' ?swapI -?GA -?lock; rsimpl. Qed.
+
 Lemma C1': (Z ij a b) ^ (X ij c) = 
-X ik ((c * b + 1) * a) .* X jk (- (b * a))
-.* X ki (- ((b * c + 1) * b * a * b))       .* X ji (- (b * a * b))                 .* Z jk (b * a) (- (b * c + 1)) 
-.* X kj (b * (c * b + 1) * a * (b * c + 1)) .* X ij ((c * b + 1) * a * (b * c + 1)) .* Z ik (- ((c * b + 1) * a)) (- b).
+  X ik ((c * b + 1) * a) .* X jk (- (b * a)) .*
+  X ki (- ((b * c + 1) * b * a * b)) .* X ji (- (b * a * b)) .* Z jk (b * a) (- (b * c + 1)) .*
+  X kj (b * (c * b + 1) * a * (b * c + 1)) .* X ij ((c * b + 1) * a * (b * c + 1)) .* Z ik (- ((c * b + 1) * a)) (- b).
 
 rewrite /Z -lock -conj_mul -/ji.
 move: (ST1 ik ij kj a 1). rsimpl. move => <-.
-rewrite conj_mul comm_conj ST1'' ST1''2
-        comm_conj ?mul_conj ST2'' // ST2' // ST1'' ST1''2; rsimpl.
-by rewrite ST2''_swap // ?GA -ST0 ST2'_swap // -GA -ST0 -{2}(mul_1_l a) -dist_r
-           comm_d2 ?GIM -?ST0' invI mul_conj {1}ST2''_swap //
-           ?conj_mul 2!ST1'' ?mul_conj ST1''2 ?Zdef ST1''2
-           ?inv_mul ?mul_inv ?invI -?GA -?lock -?mul_assoc. Qed.
+rewrite conj_mul comm_conj ST1'' ST1''2 comm_conj ?mul_conj ST2'' // ST2' // ST1'' ST1''2; rsimpl.
+rewrite ST2''_swap // ?GA -ST0 ST2'_swap // -GA -ST0 -{2}(mul_1_l a) -dist_r.
+rewrite comm_d2 ?GIM -?ST0' invI mul_conj {1}ST2''_swap //.
+rewrite ?conj_mul 2!ST1'' ?mul_conj ST1''2 ?Zdef ST1''2.
+by rewrite ?inv_mul ?mul_inv ?invI -?GA -?lock -?mul_assoc. Qed.
 
 Lemma C2: (Z ij a b) ^ (X ji c) = (Z ij a (b + c)). by rewrite /Z -?lock -/ji -conj_mul ST0. Qed.
 
 Lemma C3: (Z ij a b) ^ (X jk c) = X jk (- (b * a * c)) .* X ik (a * c) .* Z ij a b.
 by rewrite /Z -lock -/ji -conj_mul swap_comm ST2 // 
            IdG conj_mul ST1'' mul_conj ST1''2 Zdef; rsimpl. Qed.
-
-Lemma C3': (Z ij a b) ^ (X ki c) = X ki (- (c * a * b)) .* X kj (- (c * a)) .* Z ij a b.
-by rewrite /Z -lock -/ji -conj_mul swap_comm ST2 //; cancel;
-rewrite conj_mul ST1''2  mul_conj ST1'' Zdef; rsimpl. Qed.
 
 Lemma C4: (Z ij a b) ^ (X kj c) = X ki (c * b * a * b) .* X kj (c * b * a) .* Z ij a b.
 by rewrite /Z -lock -/ji -conj_mul swap_comm ST1' GA 
@@ -140,24 +162,55 @@ by rewrite /Z -lock -/ji -conj_mul swap_comm ST2 // IdG
 
 End S1.
 
+Corollary C10 i j k a b (ij : i!=j) (ik : i!=k) (jk : j!=k): 
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+
+Z ij a b = X kj a .* X ki (a * b) .* X ik (- (a * b)) .* X ij a .* Z kj (- a) (- b)
+.* X jk (- (b * a * b)) .* X ji (- (b * a * b)) .* Z ki (- (a * b)) 1.
+
+intros. move: (C1 i j k a b 0 ij ik jk) => /=. rewrite -/ji -/ki -/kj; rsimpl.
+rewrite ?Xzero. by rewrite /conj IdI IdG GId. Qed.
+
+Corollary C1'0 i j k a b (ij : i!=j) (ik : i!=k) (jk : j!=k): 
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+
+Z ij a b = X ik a .* X jk (- (b * a)) .* X ki (- (b * a * b)) .* X ji (- (b * a * b))
+.* Z jk (b * a) (- (1)) .* X kj (b * a) .* X ij a .* Z ik (- a) (- b).
+
+intros. move: (C1' i j k a b 0 ij ik jk) => /=. rewrite -/ji -/ki -/kj; rsimpl.
+rewrite ?Xzero. by rewrite /conj IdI IdG GId. Qed.
+
 (* Petrov's relation and its variations *)
 
-(* Lemma RG1 i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
+Lemma Zd i j (ij : i!=j) (ji : j!=i) a b:
+ X ji (- a) .* X ij b .* X ji a = Z ij b a.
+by rewrite /Z -lock (irrelev (swap_neq ij) ji) /conj ST0'. Qed.
+
+Lemma Zd' i j (ij : i!=j) (ji : j!=i) a b:
+ X ji (a) .* X ij b .* X ji (-a) = Z ij b (-a).
+move: (Zd i j ij ji (-a) b). by rewrite ?invI. Qed.
+
+Corollary Zd2 i j (ij : i!=j) (ji : j!=i) a b g:
+  g .* X ji (- a) .* X ij b .* X ji a = g .* Z ij b a.
+by rewrite (GA g) GA Zd. Qed.
+
+Corollary Zd2' i j (ij : i!=j) (ji : j!=i) a b g:
+  g .* X ji (a) .* X ij b .* X ji (-a) = g .* Z ij b (-a).
+move: (Zd2 i j ij ji (-a) b g). by rewrite ?invI. Qed.
+
+Ltac collectZ := rewrite -?GA -?ST0' ?invI ?Zdef'' ?Zd2 ?Zd2' ?Zd ?Zd'.
+Ltac rotate1 := rewrite ?GA; move /rotate; rewrite ?GA.
+
+(* Petrov relations can be deduced from the following 6-relation (which is not inside relative Steinberg subgroup) *)
+
+Lemma SixRelation i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
-Z ij a (b * c) = 
+Z ij (a * b) c = X ki (- (b * c)) .* Z jk (- (c * a)) b .* X ij (a * b) .* Z ki (b * c) (- a) .* X jk (c * a).
 
-X ik (- (a * b)) .* X ij a .* X ij (a * b * c * a) .* X kj (c * a) .* Z ki c (- (a * b))
- .* X ki (- c) .* X ji (- (b * c * a * b * c)) .* X ki (- (c * a * b * c)) .* Z kj (- (c * a)) (- b)
-.* X jk (- (b * c * a * b)) .* X ik (a * b).
-
-intros.
-move: (HallWitt (X jk b) (X ij (-a)) (X ki c)).
-rewrite -?ST0'.
-rewrite ST1 comm_d1 -?ST0' Zdef'' mul_conj C3 ST1''.
-rewrite ST1 comm_d2 -?ST0' Zdef'' mul_conj ST2''// C4'.
-rewrite ST1 comm_d1 -?ST0' Zdef'' mul_conj C3 ST1''; expand; rsimpl.
-rewrite (ST2''_swap ji) ?ST0' -?GA; cancel; rewrite -?ST0'.
-do 2 (move /rotate; rewrite -?GA). move /eqIdP. by rewrite -?Zinv ?invI => <-. Qed. *)
+intros. move: (HallWitt'' (X ik (-a)) (X ji c) (X kj b)).
+rewrite -?ST0' ?invI. do 3 rewrite ST1' ST1''; rsimpl.
+expand. conjugate_r (X jk ((c*a))). collectZ. rewrite ?ST0'; cancel.
+move /eqIdP. by rewrite -Zinv ?invI -ST0' => <-. Qed.
 
 Lemma RG1 i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
@@ -172,7 +225,7 @@ rewrite -(swapI jk) C4 -/ji ?swapI -?mul_assoc
          (mul_conj (X jk (- b))) Zdef' -/kj ST1''. 
 
 rewrite ?mul_conj ST2'// ST1'' C2 inv_r C4' Zdef ST1''2; rsimpl.
-rewrite Zzero ?ST0'; cancel; rewrite -?ST0' -?GA //. Qed.
+by rewrite Zzero ?ST0'; cancel; rewrite -?ST0' -?GA. Qed.
 
 Lemma RG2 i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
 let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
