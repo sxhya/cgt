@@ -61,7 +61,9 @@ Check ZC2.
 Lemma Z'zero i j a (ij : i != j): Z' ij 0 a = Id.
 apply (GCr (Z' ij 0 a)). by rewrite IdG -Z0// plus_0_r. Qed.
 
-Corollary X'zero i j (ij : i != j) (ji : j!=i): X' ij 0 = Id. by rewrite /X' Z'zero. Qed.
+Corollary X'def i j (ij : i != j) a: Z' ij a 0 = X' ij a. done. Qed.
+
+Corollary X'zero i j (ij : i != j): X' ij 0 = Id. by rewrite /X' Z'zero. Qed.
 
 Lemma Z'Inv i j a b (ij : i != j): Z' ij (-a) b = (Z' ij a b)^-1.
 apply (GCr (Z' ij a b)). by rewrite -Z0 inv_l IG Z'zero. Qed.
@@ -76,7 +78,7 @@ Context (i j k l : nat) {a b c d : R}
 
 Ltac ZX E := rewrite /X'; rewrite E; rewrite /X'; rsimpl; rewrite ?Z'zero; cancel.
 
-Lemma X0: X' ij (a + b) = X' ij a .* X' ij b. by ZX Z0. Qed.
+Lemma X0: X' ij a .* X' ij b = X' ij (a + b). by ZX Z0. Qed.
 
 Corollary X0': forall (g : ZZ), g .* X' ij a .* X' ij b = g .* X' ij (a+b).
 intros. by rewrite GA -X0. Qed.
@@ -108,11 +110,11 @@ Section MainSection.
 Corollary ZC3_swap{i j k} {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j} a b c:
  (Z' ij a b) .* (X' jk c) = (X' jk ((1 - b * a) * c)) .* X' ik (a * c) .* Z' ij a b.
 apply (GCl ((X' jk c)^-1)). rewrite -?GA. replace (X' jk c ^-1 .* Z' ij a b .* X' jk c) with (Z' ij a b ^ X' jk c); try by expand.
-by rewrite {1}/X' Z2 ZC3 dist_r mul_1_l X0; cancellate; rsimpl. Qed.
+by rewrite {1}/X' Z2 ZC3 dist_r mul_1_l -X0; cancellate; rsimpl. Qed.
 
 Corollary ZC4'_swap{i j k}{ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j} a b c:
  (Z' ij a b) .* (X' ik c) = X' ik (c + a * b * c) .* X' jk (- (b * a * b * c)) .* Z' ij a b.
-apply (GCl ((X' ik c)^-1)). rewrite X0; cancellate. replace (X' ik c ^-1 .* Z' ij a b .* X' ik c) with (Z' ij a b ^ X' ik c); [|try by expand].
+apply (GCl ((X' ik c)^-1)). rewrite -X0; cancellate. replace (X' ik c ^-1 .* Z' ij a b .* X' ik c) with (Z' ij a b ^ X' ik c); [|try by expand].
 by rewrite Z2 ZC4' XC4_swap. Qed.
 
 Corollary ZC3'_swap{i j k}{ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j} a b c:
@@ -129,13 +131,27 @@ Corollary ZC4'_swap'{i j k}{ij : i != j} {ik : i != k} {jk : j != k} {ji : j != 
  g .* (Z' ij a b) .* (X' ik c) = g .* X' ik (c + a * b * c) .* X' jk (- (b * a * b * c)) .* Z' ij a b.
 by rewrite GA ZC4'_swap // -?GA. Qed.
 
+Corollary XZ_swap {i j k}{ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j} a b c:
+X' ji a ^ X ik b .* Z' ki c b = Z' ki c b .* X' ji a ^ X ik b.
+rewrite /X' ZC3. rsimpl; rewrite ?X'zero. cancel; rewrite ?X'def -GA.
+rewrite (Gswap (Z' ki _ _)) 2!GA. apply GCl'. rewrite Z2 -(swapI jk) ZC3' ?swapI (irrelev (swap_neq ij) ji).
+rewrite 2!GA (Gswap (Z' ki _ _)) -(swapI ji) Z2 ZC4 ?swapI ?swapI (irrelev (swap_neq kj) jk) -?GA. apply GCr'.
+rewrite XC4'_swap' // 2!X0' XC4'_swap'// X0. by rewrite inv_l X'zero IdG plus_comm plus_assoc inv_r plus_0_r. Qed.
+
+Corollary XZ_swap' {i j k}{ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j} a b c:
+X' kj a ^ X ik b .* Z' ki c b = Z' ki c b .* X' kj a ^ X ik b.
+rewrite /X' -(swapI ik) ZC3'; rsimpl; rewrite ?X'zero (irrelev (swap_neq ji) ij). cancel; rewrite ?X'def -GA.
+rewrite (Gswap (Z' ki _ _)) 2!GA. apply GCl'. rewrite Z2 -(swapI ij) ZC3 ?swapI; rsimpl.
+rewrite 2!GA (Gswap (Z' ki _ _)) -(swapI kj) Z2 ZC4' ?swapI -?GA. apply GCr'.
+by rewrite X0' XC4_swap'// X0' XC4_swap'// X'Inv plus_comm -plus_assoc inv_r plus_0_l; cancel. Qed.
+
 (* ============================== *)
 
 Lemma freshN: forall (i j : nat), exists k, k!=i /\ k!=j. Admitted.
 
 Lemma CorrZ0 i j k l (ij : i!=j) (kl : k!=l) a b c d:
 Z' ij (a + b) c ^ X kl d = Z' ij a c ^ X kl d .* Z' ij b c ^ X kl d.
-
+(* 
 case: (eqneqP i k) => [/eqP|] ik; subst; [rename ij into kj|];
 (case: (eqneqP j l) => [/eqP|] jl; subst; [try rename kj into kl'; try rename ij into il|]);
 try rewrite (irrelev kl' kl) {kl'}.
@@ -145,7 +161,7 @@ try rewrite (irrelev kl' kl) {kl'}.
   rewrite ?(ZC1 k l s) ?swapI -/ls -/ks -/lk -?GA.
   remember (c*d + 1) as cd1.
   remember (d*c + 1) as dc1.
-  rewrite ?dist_l ?inv_plus ?X0 ?Z0 -?GA. apply GCr'.
+  rewrite ?dist_l ?inv_plus -?X0 ?Z0 -?GA. apply GCr'.
   rewrite ?GA. apply GCl'. rewrite -?GA.
 
 case: (eqneqP j k) => [/eqP|] jk; subst; [rename ij into ik|];
@@ -166,7 +182,7 @@ case: (eqneqP j k) => [/eqP|] jk; subst; [rename ij into ik|];
    rewrite ZC3'_swap // ?GA ZC4_swap//. apply GCl'. rewrite -?GA. apply GCr'.
    rewrite XC4'_swap' //; rsimpl. rewrite ?X0'. rewrite plus_comm plus_assoc inv_l plus_0_r.
    rewrite XC4'_swap'// ?X'Inv. by cancel.
- + (* by rewrite ?ZC5 Z0. *) admit. Qed.
+ + (* by rewrite ?ZC5 Z0. *) admit. Qed. *) Admitted.
 
 
 Axiom Z1: (Z' ij a b) ^ (X' ji c) = Z' ij a (b + c).
