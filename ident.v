@@ -143,6 +143,32 @@ Let lk := (swap_neq kl). Let li := (swap_neq il). Let lj := (swap_neq jl).
 
 (* Shorter and slicker relation taken from Petrov's Russian thesis (Lemma 7)*)
 
+Ltac rotate1 := rewrite ?GA; move /rotate; rewrite ?GA.
+
+(* Lemma C1slicker : (Z ij a b) ^ (X ij c) = (Z ij a b) ^ (X ij c).
+rewrite {2}/Z -?lock -/ji -{2}(mul_1_l a) -(ST1 ik ij kj) -conj_mul comm_conj.
+rewrite ?conj_mul ST1''2 ST1'' ?mul_conj ST2''// ST1''2 ST2'_swap // GA -ST0.
+rewrite ST1'' ST2'// (ST2''_swap ji) GA -ST0; rsimpl; rewrite comm_d1 mul_conj.
+rewrite ?GIM -?ST0' ?invI (ST2'_swap ij) conj_mul (ST2'_swap ji) conj_mul -{4}(mul_1_r a) mul_assoc -dist_l.
+rewrite 2!ST1''2 ?mul_conj ?Zdef''; rsimpl. rewrite (plus_comm _ a) ?inv_plus (ST0 _ (-a)).
+rewrite -?inv_mul 4!GA -ST1'' -4!GA.
+symmetry. apply eqIdP'. replace conj with (locked conj); [| by rewrite -?lock].
+do 5 rotate. rewrite ?ST0'. apply eqIdP. rewrite GII -?lock.
+Check eqIdP'.
+
+ ?inv_mul ?ST0' ?conjI.
+apply (GCr (X ki (a * b) ^ X ij c)). cancel.
+
+
+ -4!GA. 
+rewrite -?inv_mul ?GA -ST1''.
+rewrite ?GA ST2''_swap -?inv_mul. Check ST1''.
+assert (X ki (-(a*b)) ^ X ij c = Id).
+rewrite ST1''.
+
+ Qed.
+
+*)
 Lemma C1: (Z ij a b) ^ (X ij c) = 
    X kj (a * (b * c + 1)) .* X ki (a * b) .*
    X ik (- ((c * b + 1) * a * (b * c + 1) * b)) .* X ij ((c * b + 1) * a * (b * c + 1)) .* Z kj (- (a * (b * c + 1))) (- b) .*
@@ -212,6 +238,17 @@ rewrite ?Xzero. by rewrite /conj IdI IdG GId. Qed.
 
 Ltac rotate1 := rewrite ?GA; move /rotate; rewrite ?GA.
 Ltac simplify := expand; rewrite -?Zinv -?ST0' ?invI -?GA; rsimpl.
+
+(* Lemma RG0 i j k a b c (ij : i!=j) (ik : i!=k) (jk : j!=k):
+let ji := swap_neq ij in let ki := swap_neq ik in let kj := swap_neq jk in
+Z ij (a * b) c =
+   X jk (- (c * a)) .* X ik a .* X ij (a * b) ^ X ki (- (b * c))
+.* Z ik (- a) (- (b * c)) .* X ji (- (c * a * b * c)) ^ X kj (- b)
+.* Z jk (c * a) (- b).
+
+intros. rewrite {1}/Z -lock -/ji -(ST1 ik ij kj) comm_conj.
+rewrite ST1'' ST1''2 comm_d2 ?GIM -?ST0' ?invI mul_conj.
+rewrite conj_mul (ST2''_swap ji) conj_mul 2!ST1'' ?mul_conj ?Zdef'' -3!GA; rsimpl. *)
 
 (* Petrov relations can be deduced from the following 6-relation (which is not inside relative Steinberg subgroup) *)
 

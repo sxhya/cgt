@@ -71,6 +71,8 @@ intros. apply eqIdP in H. by rewrite H GI. Qed.
 Definition conj (h g : ZZ) := (g ^-1) .* h .* g.
 Notation "h ^ g" := (conj h g).
 
+Lemma conjI g h: (g^-1)^h = (g^h) ^-1. by rewrite /conj ?GIM GII GA. Qed.
+
 Lemma conj_mul h g1 g2: h ^ (g1 .* g2) = (h ^ g1) ^ g2.
 by rewrite /conj ?GIM ?GA. Qed.
 
@@ -80,6 +82,8 @@ by rewrite /conj ?GA -(GA g) GI IdG. Qed.
 Lemma conjId g: g ^ Id = g.
 by rewrite /conj IdI IdG GId. Qed.
 
+Lemma Idconj g: Id ^ g = Id. by rewrite /conj GId IG. Qed.
+
 (* Commutators *)
 
 Definition Comm (x y : ZZ) : ZZ := (x .* y .* x^-1 .* y^-1).
@@ -87,7 +91,7 @@ Notation "[ ~ x1 , x2 , .. , xn ]" :=
   (Comm .. (Comm x1 x2) .. xn) (at level 29, left associativity).
 
 Ltac expand := rewrite /Comm /conj ?GIM ?GII.
-Ltac cancel := rewrite ?GI' ?GI'l ?IG' ?IG'l ?GI ?IG ?IdG ?GId.
+Ltac cancel := rewrite ?IdI ?Idconj ?GI' ?GI'l ?IG' ?IG'l ?GI ?IG ?IdG ?GId.
 Ltac cancellate := expand; rewrite ?GA; cancel; rewrite -?GA.
 Ltac rotate := rewrite ?GA; apply rotate; rewrite -?GA.
 Ltac conjugate_r M := rewrite -?GA; move /(GCl' (M ^-1)) /(GCr' M); cancellate.

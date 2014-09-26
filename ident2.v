@@ -12,11 +12,11 @@ Context (i j k l : nat) {a a1 a2 : I} (b c : R).
 
 Axiom ZC1: forall (ij : i!=j) (jk : j!=k) (ik : i!=k), 
 let ki := swap_neq ik in let kj := swap_neq jk in let ji := swap_neq ij in
-(Z' ij a b) ^ (X ij c) = 
-X' ik ((c * b + 1) *_ a) .* X' jk (-_(b *_ a)) .*
-X' ki (-_ ((b * c + 1) * b *_ a _* b)) .* X' ji (-_(b *_ a _* b)) .* Z' jk (b *_ a) (-(b * c+1)) .*
-X' kj (b * (c * b + 1) *_ a _* (b * c + 1)) .* X' ij ((c * b + 1) *_ a _* (b * c + 1)) .* Z' ik (-_((c * b + 1) *_ a)) (-b).
- 
+Z' ij a b ^ X ij c =
+X' ji (- b *_ a _* b) ^ X ik (- c * b - 1) .* Z' ki (a _* b) (- c * b - 1)
+.* X' ij ((c * b + 1) *_ a _* (b * c + 1)) ^ X jk b .* Z' kj (a _* (b * c + 1)) b
+.* X' kj (-_ a) .* X' ki (-_ a _* b) ^ X ij c.
+
 Axiom ZC2: forall (ij : i!=j), let ji := swap_neq ij in (Z' ij a b) ^ (X ji c) = Z' ij a (b + c).
 
 Axiom ZC3: forall (ij : i!=j) (jk : j!=k) (ik : i!=k), let ki := swap_neq ik in let kj := swap_neq jk in let ji := swap_neq ij in
@@ -47,12 +47,13 @@ Axiom Z2: forall (ij : i!=j) (kl : k!=l), Z' ij a b ^ X' kl a1 = Z' ij a b ^ X k
 (* Fix these 2 statements*)
 
 Axiom Z3: forall (ij : i!=j) (jk : j!=k) (ik : i!=k), let ki := swap_neq ik in let kj := swap_neq jk in let ji := swap_neq ij in
- Z ij (a * b) c =  X jk (- (c * a)) .* X ik a .* Z ik (- a) (- (b * c)) .* X kj (b * c * a * b)
-   .* X ij (a * b) .* X ki (- (b * c * a * b * c)) .* X ji (- (c * a * b * c)) .* Z jk (c * a) (- b). 
+Z' ij (a _* b) c =  X' jk (-_ (c *_ a)) .* X' ik a .* X' ij (a _* b) ^ X ki (- (b * c))
+.* Z' ik (-_ a) (- (b * c)) .* X' ji (-_ (c *_ a _* b _* c)) ^ X kj (- b)
+.* Z' jk (c *_ a) (- b).
 
-Axiom Z3': forall (ij : i!=j) (jk : j!=k) (ik : i!=k), let ki := swap_neq ik in let kj := swap_neq jk in let ji := swap_neq ij in
+(* Axiom Z3': forall (ij : i!=j) (jk : j!=k) (ik : i!=k), let ki := swap_neq ik in let kj := swap_neq jk in let ji := swap_neq ij in
  Z ij (a * b) c =  Z jk (- (c * a)) b .* X ij (a * b) .* X ik a .* Z ik (- a) (- (b * c))
-.* X ji (- (c * a * b * c)) .* X jk (c * a) .* X ki (- (b * c * a * b * c)) .* X kj (- (b * c * a * b)). 
+.* X ji (- (c * a * b * c)) .* X jk (c * a) .* X ki (- (b * c * a * b * c)) .* X kj (- (b * c * a * b)). *)
 
 End RelSteinbergAxioms.
 
@@ -81,11 +82,13 @@ Lemma X0: X' ij a1 .* X' ij a2 = X' ij (a1 _+_ a2). by ZX Z0. Qed.
 Corollary X0': forall (g : ZZ), g .* X' ij a1 .* X' ij a2 = g .* X' ij (a1 _+_ a2).
 intros. by rewrite GA -X0. Qed.
 
-Corollary XC1 : (X' ij a) ^ (X ij c) = X' ik (a) .* X' ij (a) .* X' ik (-_a). by ZX (@ZC1 i j k a (0) c). Qed. 
-Corollary XC2 : (X' ij a) ^ (X ji c) = Z' ij a c. Admitted.
+(* For XC1 see below *)
+Corollary XC2 : (X' ij a) ^ (X ji c) = Z' ij a c.
+by move: (@ZC2 i j a (0) c ij) => /=; rewrite (irrelev (swap_neq ij) ji) plus_0_l /X'. Qed.
 Corollary XC3 : (X' ij a) ^ (X jk c) = X' ik (a _* c) .* X' ij a. by ZX ZC3. Qed.
-Corollary XC3': (X' ij a) ^ (X ki c) = X' kj (-_ (c *_ a)) .* X' ij a. Admitted.
-Corollary XC4 : (X' ij a) ^ (X kj c) = X' ij a. Admitted.
+Corollary XC3': (X' ij a) ^ (X ki c) = X' kj (-_ (c *_ a)) .* X' ij a.
+ by rewrite -(swapI ki); ZX ZC3'; rewrite (irrelev (swap_neq jk) kj). Qed.
+Corollary XC4 : (X' ij a) ^ (X kj c) = X' ij a. by rewrite -(swapI kj); ZX ZC4. Qed. 
 Corollary XC4': (X' ij a) ^ (X ik c) = X' ij a. by ZX ZC4'. Qed.
 Corollary XC5 : (X' ij a) ^ (X kl c) = X' ij a. by ZX ZC5. Qed.
 
@@ -104,6 +107,12 @@ intros. by rewrite GA XC4'_swap ?GA. Qed.
 End XCorollaries.
 
 Section MainSection.
+
+Corollary XC1 (a : I) (c : R) {i j k} {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j}:
+ (X' ij a) ^ (X ij c) = X' ik (a) .* X' ij (a) .* X' ik (-_a).
+rewrite (@ZC1 i j k a (0) c); rsimpl;
+rewrite (irrelev (swap_neq jk) kj) ?Z'zero ?X'zero ?X'def Xzero conjId; cancel.
+by rewrite GA X0 XC4'_swap// GA ?X0 ?inv_r' ?X'zero ?GId. Qed.
 
 Corollary ZC3_swap{i j k} {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j}
  (a c : I) (b : R):
