@@ -44,8 +44,6 @@ Axiom Z1: forall (ij : i!=j) (ji : j!=i), (Z' ij a b) ^ (X ji c) = Z' ij a (b + 
 
 Axiom Z2: forall (ij : i!=j) (kl : k!=l), Z' ij a b ^ X' kl a1 = Z' ij a b ^ X kl a1.
 
-(* Fix these 2 statements*)
-
 Axiom Z3L: forall (ij : i!=j) (jk : j!=k) (ik : i!=k), let ki := swap_neq ik in let kj := swap_neq jk in let ji := swap_neq ij in
 Z' ij (a _* b) c =             X' jk (-_ (c *_ a)) .* X' ik a .*
                  X' ij (a _* b) ^ X ki (- (b * c)) .* Z' ik (-_ a) (- (b * c)) .* 
@@ -57,10 +55,6 @@ Z' ij (b *_ a) c = (X' ji (-_ (c * b *_ a _* c)) .* X' ki (a _* c)) ^ X ik (- b)
                     X' kj (-_ a) .* X' ki (-_ (a _* c)).
 
 End RelSteinbergAxioms.
-
-(* Lemma JJJ3: forall i j k a b c (ij : i!=j) (jk : j!=k) (ik : i!=k), let ki := swap_neq ik in let kj := swap_neq jk in let ji := swap_neq ij in
-Z' ij (a _* b) c = Id.
-intros. Check Z3. *)
 
 Lemma Z'zero i j a (ij : i != j): Z' ij 0 a = Id.
 apply (GCr (Z' ij 0 a)). rewrite -Z0. by rewrite IdG; rsimpl. Qed.
@@ -180,12 +174,6 @@ rewrite -(swapI ik) ZC4 ?swapI 2!mul_conj (@XC1 _ _ _ _ k)//
         (@XC1 _ _ _ _ j)// -(swapI ik) ZC4 ?swapI -?GA
         XC4'_swap' // X0' XC4'_swap'// X0. symmetry.
 by rewrite XC4'_swap'// X0' XC4'_swap' // X0 plus_comm' (plus_comm' (b*d*_a)). Qed.
-
-(* Lemma ACL03 a d b c i j k (ij : i != j) (ik : i != k) (jk : j != k):
-let ji := swap_neq ij in let kj := swap_neq jk in let ki := swap_neq ik in
-(Z' ij a b ^ X jk d) ^ X ij (c) = (Z' ij a b ^ X ij (c)) ^ X jk d.
-intros.
-rewrite ZC *)
 
 Corollary ACL01' a b c i j k 
 (ij : i != j) (ik : i != k) (jk : j != k):
