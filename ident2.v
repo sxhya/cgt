@@ -1,11 +1,19 @@
 Require Import ssreflect ssrnat ssrbool seq eqtype Ring Group ident.
 Import Ring.RingFacts SteinbergGroup GF.
 
+Ltac collect := do 3 rewrite -?inv_plus' -?inv_plus -?dist_l -?dist_l' -?dist_l''
+                -?dist_r -?dist_r' -?dist_r''.
+
 Section RelSteinbergAxioms.
 
 Parameter Z': forall {i j : nat} (p : i != j) (a : I) (r : R), ZZ.
 
 Definition X' {i j : nat} (p : i != j) r := Z' p r (0).
+
+(* We assume that rank is at least 3 *)
+
+Axiom fresh2: forall (i j : nat), exists k, k!=i /\ k!=j.
+Axiom fresh3: forall (i j k : nat), exists l, l!=i /\ l!=j /\ l!=k.
 
 Context (i j k l : nat) {a a1 a2 : I} (b c : R).
 
@@ -192,7 +200,7 @@ Context (i j k l : nat) {a a1 a2 : I} {b c d : R}
 
 Lemma ACL01: (Z' ji a d ^ X ik (b)) ^ X ij (c) = (Z' ji a d ^ X ij (c)) ^ X ik (b).
 intros. rewrite ZC3// mul_conj -(swapI ij) ZC2 ?swapI mul_conj XC4'// XC3'// ZC3 -?GA//.
-do 2 apply GCr'. by rewrite X0 -inv_plus' -dist_r'. Qed.
+do 2 apply GCr'. by rewrite X0; collect. Qed.
 
 Lemma ACL02: (Z' jk a d ^ X ik (b)) ^ X ij (c) = (Z' jk a d ^ X ij (c)) ^ X ik (b).
 intros. 
@@ -246,14 +254,15 @@ Lemma ACL3: (((X' ji a1 .* X' ki a2) ^ X ik b) ^ X ij c) ^ (X ij d) =
 intros.
 by rewrite ACL1 // mul_conj X1 XC3// -GA ACL1 // ACL2//
  (mul_conj (X ij (c+d))) X1 XC3// ?(mul_conj (X ij d))
- ZC2 XC3// XC4// -2!GA X0' dist_l'. Qed.
+ ZC2 XC3// XC4// -2!GA X0'; collect. Qed.
 
 Lemma ACL3': (((X' ij a1 .* X' kj a2) ^ X jk b) ^ X ij c) ^ X ij (d) = 
               ((X' ij a1 .* X' kj a2) ^ X jk b) ^ (X ij (c+d)).
 intros. rewrite 4!mul_conj; do 3 rewrite ACL03'// (XC1 _ _ k)//.
 apply GCl'. rewrite X1 2!ZC4 2!mul_conj ZC4' ZC4 (XC1 _ _ k)//; rsimpl.
-rewrite ?X'zero ?IdG ?X'def -2!GA XC4'_swap'// X0' XC4'_swap// X0'.
-by rewrite -dist_r' -dist_r'' -dist_r' -dist_r XC4'_swap. Qed.
+by rewrite ?X'zero ?IdG ?X'def -2!GA XC4'_swap'// 
+           X0' XC4'_swap// X0' XC4'_swap; collect. Qed.
+
 End ActionCommutation4.
 
 Section ActionCorrectness.
@@ -269,20 +278,40 @@ rewrite 3!(mul_conj (X ij c)) 3!(mul_conj (X ij d)) 3!(mul_conj (X ij (c+d))).
 rewrite ACL3 // ACL3' //.
 replace conj with (locked conj); [|by rewrite -lock].
 rewrite ?GA. do 2 apply GCl'. rewrite -?lock.
-do 3 rewrite ?XC3 // ?XC4 // ?mul_conj -GA ?X0'.
-by rewrite -dist_l'. Qed.
+by (do 3 rewrite ?XC3 // ?XC4 // ?mul_conj -GA ?X0'); collect. Qed.
 
 End ActionCorrectness.
 
-(* ============================== *)
+Corollary ActionCorr1' i j k l (ij : i != j) (kl : k != l) a b c d:
+ (Z' ij a b ^ X kl c) ^ X kl d = Z' ij a b ^ X kl (c + d).
 
-(* Lemma freshN: forall (i j : nat), exists k, k!=i /\ k!=j. Admitted.
+case: (eqneqP i k) => [/eqP|] ik; subst; [rename ij into kj|];
+(case: (eqneqP j l) => [/eqP|] jl; subst; [try rename kj into kl'; try rename ij into il|]).
+ + rewrite (irrelev kl' kl). move: (fresh2 k l) => [] s [] sk sl.
+   set (ks := swap_neq sk); set (ls := swap_neq sl); set (lk := swap_neq kl).
+   by rewrite (ActionCorr1 k l s).
+ + set (lk := swap_neq kl); set (jk := swap_neq kj); set (lj := swap_neq jl).
+   by rewrite ?ZC4' 2!mul_conj XC4// (XC1 _ _ j) // ZC4' -2!GA
+             (XC4_swap' k l j) // X0 X0'; collect.
+ + set (lk := swap_neq kl); set (ki := swap_neq ik); set (li := swap_neq il).
+   by rewrite ?ZC4 2!mul_conj XC4'// (XC1 _ _ i) // ZC4 -2!GA
+             (XC4'_swap' k l i) // X0 X0'; collect.
+ + case: (eqneqP j k) => [/eqP|] jk; subst; [|]; 
+   (case: (eqneqP i l) => [/eqP|] il; subst; [|]).
+  * clear jl. rewrite (irrelev ij ik). clear ij. rename ik into lk. 
+    by rewrite ?ZC2 plus_assoc.
+  * rewrite (irrelev ij ik). clear ij. clear jl.
+    set (lk := swap_neq kl); set (ki := swap_neq ik); set (li := swap_neq il).
+    by rewrite ?ZC3 // 2!mul_conj (XC1 _ _ i)// XC4 // ZC3// 
+            -2!GA (XC4_swap' i l k) // X0 X0'; collect.
+  * rename ij into lj. rename ik into lk. set (kj := swap_neq jk).
+    by rewrite ?ZC3' // 2!mul_conj (XC1 _ _ j)// XC4' // ZC3'// 
+            -2!GA (XC4'_swap' k j l) // X0 X0'; collect.
+  * by rewrite ?ZC5. Qed.
+ 
+(* Lemma CorrZ0 i j k l (ij : i!=j) (kl : k!=l) a b c d:
+Z' ij (a + b) c ^ X kl d = Z' ij a c ^ X kl d .* Z' ij b c ^ X kl d.
 
-Lemma CorrZ0 i j k l (ij : i!=j) (kl : k!=l) a b c d:
-Z' ij (a + b) c ^ X kl d = Z' ij a c ^ X kl d .* Z' ij b c ^ X kl d. *)
-
-
-(* 
 case: (eqneqP i k) => [/eqP|] ik; subst; [rename ij into kj|];
 (case: (eqneqP j l) => [/eqP|] jl; subst; [try rename kj into kl'; try rename ij into il|]);
 try rewrite (irrelev kl' kl) {kl'}.
