@@ -43,9 +43,11 @@ Axiom mul_assoc'''': forall a b (c : I), a _* b _* c = a _* (b *_ c).
 
 Axiom dist_l: forall a b c, a * (b + c) = (a * b) + (a * c).
 Axiom dist_l': forall a b c, a _* (b + c) = (a _* b) _+_ (a _* c).
+Axiom dist_l'': forall c a b, a *_ (b _+_ c) = (a *_ b) _+_ (a *_ c).
 
 Axiom dist_r: forall c a b, (a + b) * c = (a * c) + (b * c).
 Axiom dist_r': forall c a b, (a + b) *_ c = (a *_ c) _+_ (b *_ c).
+Axiom dist_r'': forall c a b, (a _+_ b) _* c = a _* c _+_ b _* c.
 
 Axiom plus_comm: forall a b, a + b = b + a.
 Axiom plus_comm': forall a b, a _+_ b = b _+_ a.
