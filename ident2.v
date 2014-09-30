@@ -4,8 +4,9 @@ Import Ring.RingFacts SteinbergGroup GF.
 Ltac collect := do 3 rewrite -?inv_plus' -?inv_plus -?dist_l -?dist_l' -?dist_l''
                 -?dist_r -?dist_r' -?dist_r''.
 
-Ltac cancel_l := (replace conj with (locked conj); 
- [| by rewrite -lock]); rewrite ?GA; apply GCl'; rewrite -?GA -?lock.
+Ltac lockconj := (replace conj with (locked conj);  [| by rewrite -lock]).
+
+Ltac cancel_l := lockconj; rewrite ?GA; apply GCl'; rewrite -?GA -?lock.
 
 Section RelSteinbergAxioms.
 
@@ -335,6 +336,42 @@ rewrite (ZC1 _ _ k). rewrite XC3'// 3!mul_conj X1 XC3 // XC3 // 3!mul_conj. *)
 Lemma Hole1 i j k a b c (ij : i != j) (ji : j != i) (jk : j != k) (ik : i != k) (ki : k != i) (kj : k != j):
 ((X' kj a ^ X jk (-b * c)) ^ X ji b) ^ X ik (c) = (X' kj a ^ X ik c) ^ X ji b.
 rewrite X1 ZC3 // XC3' // 3! mul_conj XC3 // X1 ZC3' // X1 XC3//; rsimpl.
+
+replace (X' jk ((b * c *_ a) _* b _* c) .* X' ji ((b * c *_ a) _* b)) with
+        (X' ji ((b * c *_ a) _* b) ^ X ik c); [| by rewrite XC3 //].
+replace (X' ik ((c *_ a) _* b _* c) .* X' ij (-_ (c *_ a))) with
+        (X' ij (-_ (c *_ a)) ^ X jk (- b * c)); [| by rewrite XC3 //; rsimpl].
+replace (X' ki (a _* b) .* X' kj a) with (X' kj a ^ X ji b); [|rewrite XC3 //].
+
+rewrite -GA.
+
+(* This should follow from commutativty + Z3L*)
+Lemma Z3L': forall i j k a b c (ij : i!=j) (jk : j!=k) (ik : i!=k) (ki : k!=i) (kj : k!=j) (ji : j!=i), 
+(X' ik (-_ a) ^ X kj (- b)) ^ X ji c =
+(X' ik (-_ a) ^ X kj (- b)) ^ X ki (- (b * c)) .* (X' jk (c *_ a) ^ X ij (b * c)) ^ X kj (- b).
+
+      Z' ij (a _* b) c = X' jk (-_ (c *_ a)) .* X' ik a .*
+      X' ij (a _* b) ^ X ki (- (b * c)) .* Z' ik (-_ a) (- (b * c)) .* 
+      X' ji (-_ (c *_ a _* b _* c)) ^ X kj (- b) .* Z' jk (c *_ a) (- b).
+intros. replace (X' jk (-_ (c *_ a)) .* X' ik a) with (X' ik (a) ^ X ji c); try by rewrite XC3'.
+rewrite -3!X1 GA -mul_conj (GA (X' ik a ^ X ji c)) -mul_conj.
+replace (X' ji (-_ (c *_ a _* b _* c)) .* X' jk (c *_ a)) with (X' jk (c *_ a) ^ X ij (b * c)); [| admit]. (* Use commutativity? *)
+apply (GCl ((X' ik a ^ X ji c) ^-1)). lockconj. rewrite -?GA -?lock. cancel. rewrite -conjI -mul_conj -X'Inv.
+rewrite XC4'_swap //.
+replace (X' ij (a _* b) .* X' ik (-_ a)) with (X' ik (-_a) ^ X kj (-b)); try by rewrite XC3 //; rsimpl.
+
+
+Axiom Z3R: forall (ij : i!=j) (jk : j!=k) (ik : i!=k) (ki : k!=i) (kj : k!=j) (ji : j!=i),
+      Z' ij (b *_ a) c = (X' ji (-_ (c * b *_ a _* c)) .* X' ki (a _* c)) ^ X ik (- b) .*
+      (X' ij (b *_ a) .* X' kj a) ^ X jk (c * b) .*
+      X' kj (-_ a) .* X' ki (-_ (a _* c)).
+
+Lemma Z3L: forall (ij : i!=j) (jk : j!=k) (ik : i!=k) (ki : k!=i) (kj : k!=j) (ji : j!=i), 
+Z' ij (a _* b) c ^ 
+
+
+Check Z3R.
+
 (* rewrite (Z3L k i j) // ?mul_conj. *)
 
 (* We are left with some variation of Relation Z3 -
