@@ -84,6 +84,8 @@ by rewrite /conj IdI IdG GId. Qed.
 
 Lemma Idconj g: Id ^ g = Id. by rewrite /conj GId IG. Qed.
 
+Lemma conj_eq g1 g2 h : g1 = g2 -> g1 ^ h = g2 ^ h. by move => ->. Qed.
+
 (* Commutators *)
 
 Definition Comm (x y : ZZ) : ZZ := (x .* y .* x^-1 .* y^-1).
@@ -96,6 +98,8 @@ Ltac cancellate := expand; rewrite ?GA; cancel; rewrite -?GA.
 Ltac rotate := rewrite ?GA; apply rotate; rewrite -?GA.
 Ltac conjugate_r M := rewrite -?GA; move /(GCl' (M ^-1)) /(GCr' M); cancellate.
 Ltac conjugate_l M := rewrite -?GA; move /(GCl' M) /(GCr' (M^-1)); cancellate.
+Ltac lockconj := (replace conj with (locked conj);  [| by rewrite -lock]).
+Ltac cancel_l := lockconj; rewrite ?GA; apply GCl'; rewrite -?GA -?lock.
 
 Lemma Gswap a b: a .* b = b .* a ^ b. by cancellate. Qed.
 

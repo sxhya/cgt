@@ -1,13 +1,6 @@
 Require Import ssreflect ssrnat ssrbool seq eqtype Ring Group ident.
 Import Ring.RingFacts SteinbergGroup GF.
 
-Ltac collect := do 3 rewrite -?inv_plus' -?inv_plus -?dist_l -?dist_l' -?dist_l''
-                -?dist_r -?dist_r' -?dist_r''.
-
-Ltac lockconj := (replace conj with (locked conj);  [| by rewrite -lock]).
-
-Ltac cancel_l := lockconj; rewrite ?GA; apply GCl'; rewrite -?GA -?lock.
-
 Section RelSteinbergAxioms.
 
 Parameter Z': forall {i j : nat} (p : i != j) (a : I) (r : R), ZZ.
@@ -377,8 +370,6 @@ Check Z3R.
 (* We are left with some variation of Relation Z3 -
    TODO: Rethink this *)
 Admitted.
-
-Lemma conj_eq g1 g2 h : g1 = g2 -> g1 ^ h = g2 ^ h. by move => ->. Qed.
 
 Corollary Action1 a1 a2 b (c : R) i j k (ij : i!=j) (jk : j!=k) (ki : k!=i) (ji : j!=i) (kj : k!=j) (ik :i!=k):
  Z' ij (a1 _+_ a2) b = Z' ij a1 b .* Z' ij a2 b.

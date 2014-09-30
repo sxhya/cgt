@@ -52,9 +52,6 @@ Axiom dist_r'': forall c a b, (a _+_ b) _* c = a _* c _+_ b _* c.
 Axiom plus_comm: forall a b, a + b = b + a.
 Axiom plus_comm': forall a b, a _+_ b = b _+_ a.
 
-(* We don't use commutativity *)
-Axiom mul_comm: forall a b, a * b = b * a.
-
 Axiom mul_1_r: forall a, a * 1 = a.
 Axiom mul_1_l: forall a, 1 * a = a.
 Axiom mul_1_r': forall a, a _* 1 = a.
@@ -133,5 +130,15 @@ Ltac rsimpl := (do 3 rewrite
                ?mul_0_r' ?mul_0_l' ?mul_0_r'' ?mul_0_l'' ?plus_0_l' ?plus_0_r' ?inv_zero'
                ?mul_inv' ?inv_mul' ?mul_inv'' ?inv_mul'' ?mul_inv''' ?inv_mul''' 
                ?mul_1_r' ?mul_1_l' -?mul_assoc' -?mul_assoc'' -?mul_assoc''' -?mul_assoc'''' ?invI'); rewrite -?mIRRI.
+Ltac collect := do 3 rewrite -?inv_plus' -?inv_plus -?dist_l -?dist_l' -?dist_l''
+                -?dist_r -?dist_r' -?dist_r''.
 
 End RingFacts.
+
+Module CommRing. Import RingFacts.
+
+Axiom mul_comm: forall a b, a * b = b * a.
+Axiom mul_comm': forall a (b : I), a _* b = b _* a.
+Axiom mul_comm'': forall a b, a _* b = b *_ a.
+
+End CommRing.
