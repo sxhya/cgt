@@ -4,6 +4,9 @@ Import Ring.RingFacts SteinbergGroup GF.
 Ltac collect := do 3 rewrite -?inv_plus' -?inv_plus -?dist_l -?dist_l' -?dist_l''
                 -?dist_r -?dist_r' -?dist_r''.
 
+Ltac cancel_l := (replace conj with (locked conj); 
+ [| by rewrite -lock]); rewrite ?GA; apply GCl'; rewrite -?GA -?lock.
+
 Section RelSteinbergAxioms.
 
 Parameter Z': forall {i j : nat} (p : i != j) (a : I) (r : R), ZZ.
@@ -18,7 +21,7 @@ Axiom fresh3: forall (i j k : nat), exists l, l!=i /\ l!=j /\ l!=k.
 Context (i j k l : nat) {a a1 a2 : I} (b c : R).
 
 (* Definition of the action of the Steinberg group on relative generators *)
-
+(* Don't use it *)
 Axiom ZC1: forall (ij : i!=j) (jk : j!=k) (ik : i!=k) (ji : j!=i) (kj : k!=j) (ki : k!=i), 
       Z' ij a b ^ X ij c =
       X' ji (- b *_ a _* b) ^ X ik (- c * b - 1) .* Z' ki (a _* b) (- c * b - 1) .*
@@ -210,6 +213,8 @@ rewrite -(swapI ik) ZC4// ?swapI 2!mul_conj (XC1 _ _ k)//
         XC4'_swap' // X0' XC4'_swap'// X0. symmetry.
 by rewrite XC4'_swap'// X0' XC4'_swap' // X0 plus_comm' (plus_comm' (b*d*_a)). Qed.
 
+Lemma ACL04 : (Z' kj a b ^ X ik c) ^ X jk d = (Z' kj a b ^ X jk d) ^ X ik c.
+by rewrite ZC3' // 2!mul_conj XC3// XC4 // ZC2 ZC3' // -GA X0; rsimpl; collect. Qed.
 End ActionCommutation1.
 
 Section ActionCommutation2.
@@ -224,6 +229,9 @@ by intros; rewrite ?/X' ACL02. Qed.
 
 Lemma ACL03': (X' ij a ^ X jk b) ^ X ij c = (X' ij a ^ X ij c) ^ X jk b.
 intros. by rewrite XC3// (XC1 _ _ k)// mul_conj XC3// XC4'// (XC1 _ _ k). Qed.
+
+Corollary ACL04' : (X' kj a ^ X ik b) ^ X jk c = (X' kj a ^ X jk c) ^ X ik b.
+by rewrite ACL04 //. Qed.
 
 End ActionCommutation2.
 
@@ -241,6 +249,10 @@ intros. by rewrite 2!mul_conj -ACL01' // ACL01' // 2!mul_conj. Qed.
 Lemma ACL2: ((Z' ji a1 b .* X' kj a2 .* X' ki a3) ^ X ik d) ^ X ij c = 
             ((Z' ji a1 b .* X' kj a2 .* X' ki a3) ^ X ij c) ^ X ik d.
 intros. by rewrite 4!mul_conj ACL01// -ACL02'// -ACL01'// -?mul_conj. Qed.
+
+Lemma ACL4': ((X' ki a1 .* X' kj a2) ^ X ik c) ^ X jk b = 
+             ((X' ki a1 .* X' kj a2) ^ X jk b) ^ X ik c.
+intros. rewrite 4!mul_conj -ACL04' // -ACL04' //. Qed.
 
 End ActionCommutation3.
 
@@ -308,7 +320,68 @@ case: (eqneqP i k) => [/eqP|] ik; subst; [rename ij into kj|];
     by rewrite ?ZC3' // 2!mul_conj (XC1 _ _ j)// XC4' // ZC3'// 
             -2!GA (XC4'_swap' k j l) // X0 X0'; collect.
   * by rewrite ?ZC5. Qed.
- 
+
+(*Lemma ZC1' a b c i j k (ij : i!=j) (jk : j!=k) (ki : k!=i) (ji : j!=i) (kj : k!=j) (ik :i!=k):
+Z' ij (-_a) b ^ X ij c = X' ki (a _* b) .* X' kj (a _* (b * c + 1)) .*
+                    (X' ki (a _* b) ^ X jk (-b)) ^ X ik ((c * b) + 1) .*
+                    (X' kj (a _* (b * c + 1)) ^ X ik ((c * b) + 1)) ^ X jk (-b).
+ rewrite Z'Inv. Search
+rewrite (ZC1 _ _ k) 2!mul_conj ?X1 XC3'// XC3 // XC3 // XC3 // -?GA. *)
+
+(* Lemma ZC1' a b c i j k (ij : i!=j) (jk : j!=k) (ki : k!=i) (ji : j!=i) (kj : k!=j) (ik :i!=k):
+      ((X' kj a ^ (X ik (-(1))) .* X' kj (-_(a))) ^ X ji b) ^ X ij c = Z' ij a b ^ X ij c.
+rewrite (ZC1 _ _ k). rewrite XC3'// 3!mul_conj X1 XC3 // XC3 // 3!mul_conj. *)
+
+Lemma Hole1 i j k a b c (ij : i != j) (ji : j != i) (jk : j != k) (ik : i != k) (ki : k != i) (kj : k != j):
+((X' kj a ^ X jk (-b * c)) ^ X ji b) ^ X ik (c) = (X' kj a ^ X ik c) ^ X ji b.
+rewrite X1 ZC3 // XC3' // 3! mul_conj XC3 // X1 ZC3' // X1 XC3//; rsimpl.
+(* rewrite (Z3L k i j) // ?mul_conj. *)
+
+(* We are left with some variation of Relation Z3 -
+   TODO: Rethink this *)
+Admitted.
+
+Lemma conj_eq g1 g2 h : g1 = g2 -> g1 ^ h = g2 ^ h. by move => ->. Qed.
+
+Corollary Action1 a1 a2 b (c : R) i j k (ij : i!=j) (jk : j!=k) (ki : k!=i) (ji : j!=i) (kj : k!=j) (ik :i!=k):
+ Z' ij (a1 _+_ a2) b = Z' ij a1 b .* Z' ij a2 b.
+rewrite -(mul_1_l' (a1 _+_ a2)) -(mul_1_l' a1) -(mul_1_l' a2) ?(Z3R _ _ k).
+rsimpl. rewrite ?dist_l'' ?dist_r'' ?inv_plus' -?X0 -?X0'.
+
+rewrite -2!GA. rewrite (XC4'_swap' k j i)// -4!GA. do 2 apply GCr'.
+rewrite (XC4_swap' j i k) // (GA (X' ji (-_ ((b *_ a1) _* b)) .* X' ki (a1 _* b))).
+rewrite (mul_conj (X ik (-(1)))). cancel_l.
+replace (X' ij a1 .* X' kj a1) with (X' kj (a1) ^ X ik (-(1)));
+replace (X' ji (-_ ((b *_ a2) _* b)) .* X' ki (a2 _* b)) with 
+        (X' ki (a2 _* b) ^ X jk (b));
+try (by rewrite XC3' //; rsimpl).
+rewrite (XC4_swap' i j k) // (GA (X' ij a1 .* X' kj a1)) mul_conj -GA.
+
+replace (X' ij a1 .* X' kj a1) with (X' kj (a1) ^ X ik (-(1)));
+replace (X' ij a2 .* X' kj a2) with (X' kj (a2) ^ X ik (-(1)));
+try (by rewrite XC3' //; rsimpl).
+
+rewrite ACL04' // -?mul_conj.
+rewrite X0' (XC4'_swap k i j) // -X0 4!mul_conj.
+cancel_l. 
+
+assert (X' kj (-_ a1) .* X' ki (-_ (a1 _* b)) = X' kj (-_ a1) ^ X ji b).
+ by rewrite XC3 // XC4'_swap//; rsimpl.
+
+rewrite H 2!GA H -GA -?mul_conj GA -?mul_conj.
+
+rewrite (XC4'_swap)//. rewrite ACL4' //.
+
+replace ((X' ki (a2 _* b) .* X' kj a2)) with (X' kj a2 ^ X ji b);
+[| by rewrite XC3 //].
+
+rewrite ACL01' //.
+move: (Hole1 i j k a2 b (-(1)) ij ji jk ik ki kj); rsimpl; move => ->.
+
+rewrite -?mul_conj.
+
+apply conj_eq. by rewrite XC3' // -GA (XC4_swap k j i) // 2!GA ?X0 ?inv_plus' plus_comm'. Qed.
+
 (* Lemma CorrZ0 i j k l (ij : i!=j) (kl : k!=l) a b c d:
 Z' ij (a + b) c ^ X kl d = Z' ij a c ^ X kl d .* Z' ij b c ^ X kl d.
 
