@@ -1,13 +1,6 @@
 Require Import ssreflect ssrnat ssrbool seq eqtype.
 
-Module Type GroupCarrier.
-
 Parameter ZZ : Type.
-
-End GroupCarrier.
-
-Module GroupFacts (carrier : GroupCarrier).
-Import carrier.
 
 (* Group Structure *)
 Variable (group_mul : ZZ -> ZZ -> ZZ) (groupinv : ZZ -> ZZ) (Id : ZZ).
@@ -148,5 +141,3 @@ move: (HallWitt (x^-1) (y^-1) (z^-1)). by rewrite ?GII. Qed.
 Corollary HallWitt'' x y z:
  [~ x^-1, y^-1, (z^-1)^y] .* [~ y^-1, z^-1, (x^-1)^z] .* [~ z^-1, x^-1, (y^-1)^x] = Id. 
 by rewrite -?comm3 HallWitt'. Qed.
-
-End GroupFacts.

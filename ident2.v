@@ -1,5 +1,5 @@
 Require Import ssreflect ssrnat ssrbool seq eqtype Ring Group ident.
-Import Ring.RingFacts SteinbergGroup GF.
+Import Ring.RingFacts.
 
 Section RelSteinbergAxioms.
 
@@ -44,9 +44,6 @@ Axiom ZC5: forall (ij : i!=j) (jk : j!=k) (ik : i!=k) (il : i!=l) (jl : j!=l) (k
 
 Axiom Z0: forall (ij : i!=j), Z' ij (a1 _+_ a2) c = Z' ij a1 c .* Z' ij a2 c.
 
-Axiom Z1: forall (ij : i!=j) (ji : j!=i), 
-      (Z' ij a b) ^ (X ji c) = Z' ij a (b + c).
-
 Axiom Z2: forall (ij : i!=j) (kl : k!=l), 
       Z' ij a b ^ X' kl a1 = Z' ij a b ^ X kl a1.
 
@@ -86,7 +83,7 @@ Ltac ZX E := rewrite /X'; rewrite E; rewrite /X'; rsimpl; rewrite ?Z'zero; cance
 
 Lemma X0: X' ij a1 .* X' ij a2 = X' ij (a1 _+_ a2). by ZX Z0. Qed.
 
-Lemma X1: X' ij a ^ X ji b = Z' ij a b. by rewrite /X' Z1 ?X'def plus_0_l. Qed.
+Lemma X1: X' ij a ^ X ji b = Z' ij a b. by rewrite /X' ZC2 ?X'def plus_0_l. Qed.
 
 Corollary X0': forall (g : ZZ), g .* X' ij a1 .* X' ij a2 = g .* X' ij (a1 _+_ a2).
 intros. by rewrite GA -X0. Qed.

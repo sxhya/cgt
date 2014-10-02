@@ -1,12 +1,6 @@
 Require Import ssreflect ssrnat ssrbool seq eqtype Ring Group.
 
-Module SteinbergGroup <: GroupCarrier.
-Variable ZZ : Type.
-End SteinbergGroup.
-
-Module Import GF := Group.GroupFacts SteinbergGroup.
 Module Import RF := Ring.RingFacts.
-Import SteinbergGroup.
 
 (* Reflection principle for (in)equality *)
 
