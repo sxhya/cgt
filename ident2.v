@@ -1,6 +1,9 @@
 Require Import ssreflect ssrnat ssrbool seq eqtype Ring Group ident.
 Import Ring.RingFacts.
 
+Ltac rexpand := do 3 rewrite ?inv_plus' ?inv_plus ?dist_l ?dist_l' ?dist_l''
+                             ?dist_r ?dist_r' ?dist_r''.
+
 Section RelSteinbergAxioms.
 
 Parameter Z': forall {i j : nat} (p : i != j) (a : I) (r : R), ZZ.
@@ -160,6 +163,56 @@ by rewrite Z2 ZC4; rsimpl. Qed.
 
 End SwapLemmata.
 
+Section Z0_ZC.
+
+Context (i j k : nat) (a a1 a2 : I) (b c : R)
+(ij : i != j) (ik : i != k) (jk : j != k) (ji : j != i) (ki : k != i) (kj : k != j).
+
+(* Boilerplate lemmata about preservation of Relation Z0 *)
+
+Lemma Z0_ZC2: forall (ij : i != j) (ji : j != i),
+      (Z' ij (a1 _+_ a2) b) ^ (X ji c) = (Z' ij (a1) b) ^ (X ji c) .* (Z' ij (a2) b) ^ (X ji c).
+by intros; rewrite ?ZC2 Z0. Qed.
+
+Lemma Z0_ZC3: (Z' ij (a1 _+_ a2) b) ^ (X jk c) = (Z' ij (a1) b) ^ (X jk c) .* (Z' ij (a2) b) ^ (X jk c).
+rewrite ?ZC3 //. rewrite Z0 -?GA. apply GCr'. rexpand.
+rewrite -X0 ?GA. apply GCl'. 
+rewrite -3!GA -X0 -GA XC4_swap // ?GA. apply GCl'.
+rewrite -?GA ZC3_swap //. rexpand. rsimpl. rewrite -X0 ?GA. apply GCl'.
+rewrite ZC4'_swap // -?GA. apply GCr'. rewrite X0'.
+rewrite XC4_swap' // X0. rsimpl. rewrite inv_r' X'zero IdG. rexpand.
+rewrite plus_comm' plus_assoc' inv_r' plus_0_r'. done. Qed.
+
+Lemma Z0_ZC3': (Z' ij (a1 _+_ a2) b) ^ (X ki c) = (Z' ij a1 b) ^ (X ki c) .* (Z' ij a2 b) ^ (X ki c).
+rewrite ?ZC3' //. rexpand. rewrite -X0 Z0 -?GA. apply GCr'.
+cancel_l. rewrite -X0 -GA -?GA XC4'_swap //. cancel_l.
+rewrite ZC3'_swap //. cancel_l. rewrite ?GA. rewrite ZC4_swap // -?GA. apply GCr'.
+rewrite XC4'_swap' // ?X0'. rewrite XC4'_swap // ?X0'. rsimpl.
+by rewrite inv_r' X'zero GId plus_comm' plus_assoc' inv_l' plus_0_r'. Qed.
+
+Lemma Z0_ZC4: (Z' ij (a1 _+_ a2) b) ^ (X kj c) = (Z' ij a1 b) ^ (X kj c) .* (Z' ij a2 b) ^ (X kj c).
+rewrite ?ZC4 //. rexpand. rewrite -X0 Z0 -?GA. apply GCr'.
+cancel_l. rewrite -X0 -GA -?GA XC4'_swap //. cancel_l.
+rewrite ZC3'_swap //. cancel_l. rewrite ?GA ZC4_swap // -?GA. apply GCr'.
+rewrite XC4'_swap' // ?X0' XC4'_swap // ?X0'. rsimpl.
+by rewrite plus_comm' plus_assoc' inv_r' plus_0_r' inv_l' X'zero GId. Qed.
+
+Lemma Z0_ZC4' : (Z' ij (a1 _+_ a2) b) ^ (X ik c) = (Z' ij a1 b) ^ (X ik c) .* (Z' ij a2 b) ^ (X ik c).
+rewrite ?ZC4' //. rexpand. rewrite -X0 Z0 -?GA. apply GCr'.
+cancel_l. rewrite -X0 -GA -?GA XC4_swap //. cancel_l.
+rewrite ZC3_swap //. rexpand. rsimpl. rewrite -X0. cancel_l.
+rewrite GA ZC4'_swap // -?GA. apply GCr'. rewrite ?X0'.
+rewrite XC4_swap' // ?X0' ?X0. rsimpl. rewrite inv_r' X'zero IdG.
+by rewrite -plus_assoc' plus_comm' -plus_assoc' inv_r' plus_0_l'. Qed.
+
+Context (l : nat) (il : i != l) (li : l != i) (jl : j != l) (lj : l != j) (kl : k != l) (lk : l != k).
+
+Lemma Z0_ZC5: (Z' ij (a1 _+_ a2) b) ^ (X kl c) = 
+              (Z' ij (a1) b) ^ (X kl c) .* (Z' ij (a2) b) ^ (X kl c).
+by rewrite ?ZC5 // Z0. Qed.
+
+End Z0_ZC.
+
 Lemma Z3R: forall i j k a b c(ij : i!=j) (jk : j!=k) (ik : i!=k) (ki : k!=i) (kj : k!=j) (ji : j!=i),
       Z' ij (b *_ a) c = (X' ji (-_ (c * b *_ a _* c)) .* X' ki (a _* c)) ^ X ik (- b) .*
       (X' ij (b *_ a) .* X' kj a) ^ X jk (c * b) .*
@@ -212,7 +265,7 @@ by rewrite ACL05 //. Qed.
 
 End ActionCommutation2.
 
-(* ========================== *)
+(* There are no problems with argument validity before this line *)
 
 Section ActionCommutation3.
 
@@ -311,6 +364,7 @@ case: (eqneqP i k) => [/eqP|] ik; subst; [rename ij into kj|];
             -2!GA (XC4'_swap' k j l) // X0 X0'; collect.
   * by rewrite ?ZC5. Qed.
 
+(* TODO: Fix this error *)
 Lemma Z0Lemma k i j a1 a2 b (ij : i!=j) (jk : j!=k) (ki : k!=i) (ji : j!=i) (kj : k!=j) (ik :i!=k):
  Z' ij (a1 _+_ a2) b = Z' ij a1 b .* Z' ij a2 b. 
 
@@ -331,18 +385,18 @@ try rewrite (irrelev kl' kl) {kl'}.
 
 + move: (fresh2 k l) => [] s [] sk sl.
   set (ls := swap_neq sl); set (ks := swap_neq sk); set (lk := swap_neq kl).
-  rewrite -mul_conj. apply conj_eq. rewrite (Z0Lemma s) //.
+  admit.
 + set (lk := swap_neq kl); set (jk := swap_neq kj); set (lj := swap_neq jl).
-  by rewrite -?X1 -?mul_conj X0.
+  by rewrite Z0_ZC4'.
 + set (lk := swap_neq kl); set (ki := swap_neq ik); set (li := swap_neq il).
-  by rewrite -?X1 -?mul_conj X0.
+  by rewrite Z0_ZC4.
 + case: (eqneqP j k) => [/eqP|] jk; subst; [|]; 
   (case: (eqneqP i l) => [/eqP|] il; subst; [|]).
  * clear ik; rename ij into lk; clear jl.
-   by rewrite ?ZC2 -Z0.
+   by rewrite Z0_ZC2.
  * clear ik; clear jl. rename ij into ik.
    set (lk := swap_neq kl); set (ki := swap_neq ik); set (li := swap_neq il).
-   by rewrite -?X1 -?mul_conj X0.
+   by rewrite Z0_ZC3.
  * rename ij into lj. rename ik into lk. set (kj := swap_neq jk).
-   by rewrite -?X1 -?mul_conj X0.
- * do 3 rewrite ZC5 //. by rewrite Z0. Qed.
+   by rewrite Z0_ZC3'.
+ * rewrite Z0_ZC5 //. Qed.
