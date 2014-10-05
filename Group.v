@@ -64,6 +64,8 @@ intros. apply eqIdP in H. by rewrite H GI. Qed.
 Definition conj (h g : ZZ) := (g ^-1) .* h .* g.
 Notation "h ^ g" := (conj h g).
 
+Lemma conj_def g h: h^-1 .* g .* h = g ^ h. by rewrite /conj. Qed.
+
 Lemma conjI g h: (g^-1)^h = (g^h) ^-1. by rewrite /conj ?GIM GII GA. Qed.
 
 Lemma conj_mul h g1 g2: h ^ (g1 .* g2) = (h ^ g1) ^ g2.

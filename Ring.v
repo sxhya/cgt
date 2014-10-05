@@ -130,8 +130,12 @@ Ltac rsimpl := (do 3 rewrite
                ?mul_0_r' ?mul_0_l' ?mul_0_r'' ?mul_0_l'' ?plus_0_l' ?plus_0_r' ?inv_zero'
                ?mul_inv' ?inv_mul' ?mul_inv'' ?inv_mul'' ?mul_inv''' ?inv_mul''' 
                ?mul_1_r' ?mul_1_l' -?mul_assoc' -?mul_assoc'' -?mul_assoc''' -?mul_assoc'''' ?invI'); rewrite -?mIRRI.
+
 Ltac collect := do 3 rewrite -?inv_plus' -?inv_plus -?dist_l -?dist_l' -?dist_l''
                 -?dist_r -?dist_r' -?dist_r''.
+
+Ltac rexpand := do 3 rewrite ?inv_plus' ?inv_plus ?dist_l ?dist_l' ?dist_l''
+                 ?dist_r ?dist_r' ?dist_r''.
 
 End RingFacts.
 
