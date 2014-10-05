@@ -94,7 +94,9 @@ Ltac rotate := rewrite ?GA; apply rotate; rewrite -?GA.
 Ltac conjugate_r M := rewrite -?GA; move /(GCl' (M ^-1)) /(GCr' M); cancellate.
 Ltac conjugate_l M := rewrite -?GA; move /(GCl' M) /(GCr' (M^-1)); cancellate.
 Ltac lockconj := (replace conj with (locked conj);  [| by rewrite -lock]).
-Ltac cancel_l := lockconj; rewrite ?GA; apply GCl'; rewrite -?GA -?lock.
+Ltac cancel_l := rewrite ?GA; apply GCl'; rewrite -?GA.
+Ltac cancel_r := rewrite -?GA; apply GCr'; rewrite -?GA.
+Ltac bite := repeat (progress (try cancel_l; try cancel_r)).
 
 Lemma Gswap a b: a .* b = b .* a ^ b. by cancellate. Qed.
 
