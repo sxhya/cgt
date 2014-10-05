@@ -194,8 +194,6 @@ by rewrite ?GA ZC5_swap. Qed.
 
 End SwapLemmata.
 
-Section Z0_ZC.
-
 Ltac Z_guard :=
   match goal with
     | [ |- is_true (negb (eq_op ?X ?X)) ] => fail 1
@@ -247,6 +245,8 @@ rewrite /conj. do 2ZC. by rewrite -X'Inv -ZC5_swap // X'Inv GA; cancel. Qed.
 
 End Z2_ZC.
 
+Section Z0_ZC.
+
 Context (i j k : nat) (a a1 a2 : I) (b c : R)
 (ij : i != j) (ik : i != k) (jk : j != k) (ji : j != i) (ki : k != i) (kj : k != j).
 
@@ -256,26 +256,42 @@ Lemma Z0_ZC2: (Z' ij (a1 _+_ a2) b) ^^ (X ji c) = (Z' ij (a1) b) ^^ (X ji c) .* 
 ZCR. by rewrite Z0. Qed.
 
 Lemma Z0_ZC3: (Z' ij (a1 _+_ a2) b) ^^ (X jk c) = (Z' ij (a1) b) ^^ (X jk c) .* (Z' ij (a2) b) ^^ (X jk c).
-ZCR. rewrite -?X'Inv; rexpand; rewrite -X0 Z0 -?GA.
-rewrite ZC3_swap' // ZC4_swap' // ZC4'_swap' //; rsimpl.
-rewrite ?X'zero ?X'def -X0; cancel; bite.
-rewrite X0' XC4_swap' // X0. collect.
-by rewrite dist_r plus_assoc; rsimpl; rewrite inv_l' plus_0_r
-        dist_r'' plus_comm' plus_assoc' inv_r' plus_0_r' XC4_swap. Qed.
+ZCR. 
+rewrite -?X'Inv; rexpand; rewrite -?X0 Z0; bite.
+rewrite XC4_swap //; bite.
+rewrite ZC3_swap //; rexpand; rsimpl; rewrite -X0; bite.
+rewrite ZC4'_swap' // X0' XC4_swap // plus_comm' plus_assoc'.
+rsimpl. rewrite inv_r' plus_0_r'. bite.
+by rewrite X0 inv_r' X'zero IdG. Qed.
 
 Lemma Z0_ZC3': (Z' ij (a1 _+_ a2) b) ^^ (X ki c) = (Z' ij a1 b) ^^ (X ki c) .* (Z' ij a2 b) ^^ (X ki c).
-ZCR. rewrite -?X'Inv; rexpand; rewrite -X0 Z0 -?GA. bite.
-rewrite ZC3'_swap' // ZC4_swap' //. bite.
-rewrite ?X0' XC4'_swap' // X0' XC4'_swap' // X0'; rsimpl.
-rewrite plus_assoc' inv_r' plus_0_r'. symmetry. rewrite XC4'_swap // X0'. bite.
-by rewrite plus_assoc' (plus_comm' (-_ (c *_ a2))) 
--(plus_assoc' (((c *_ a2) _* b *_ a1))) inv_r' plus_0_l'. Qed.
+ZCR. 
+rewrite -?X'Inv; rexpand; rewrite -X0 Z0. bite.
+rewrite XC4'_swap // -X0; bite.
+rewrite ZC3'_swap // XC4'_swap //. bite. 
+rewrite ZC4_swap' ?X0'. bite.
+rewrite ?X0' XC4'_swap' ?X0' // XC4'_swap // plus_comm' -?plus_assoc'.
+rsimpl. by rewrite inv_l' plus_0_l' ?X0' inv_r' X'zero GId. Qed.
 
 Lemma Z0_ZC4: (Z' ij (a1 _+_ a2) b) ^^ (X kj c) = (Z' ij a1 b) ^^ (X kj c) .* (Z' ij a2 b) ^^ (X kj c).
-Admitted.
+ZCR. 
+rexpand. rewrite -X0 Z0. bite.
+rewrite XC4'_swap // -X0. bite.
+rewrite ZC3'_swap // X0.
+rewrite ZC4_swap' // X0'. bite. rsimpl.
+rewrite XC4'_swap // -X0. bite.
+by rewrite XC4'_swap // X0' inv_l' X'zero GId X0 plus_comm'
+        -?plus_assoc' inv_r' plus_0_l'. Qed.
+
 
 Lemma Z0_ZC4' : (Z' ij (a1 _+_ a2) b) ^^ (X ik c) = (Z' ij a1 b) ^^ (X ik c) .* (Z' ij a2 b) ^^ (X ik c).
-Admitted.
+ZCR. 
+rewrite -?X'Inv. rexpand. rewrite -X0 Z0. bite.
+rewrite XC4_swap // -X0. bite.
+rewrite ZC3_swap // ZC4'_swap' // ?X0'. bite.
+rewrite XC4_swap' // X0 XC4_swap //. rexpand. rsimpl.
+rewrite plus_assoc' inv_r'  plus_0_r' (plus_comm' (a2 _* b _* c)) -plus_assoc'. rsimpl.
+by rewrite inv_l' plus_0_l'. Qed.
 
 Context (l : nat) (il : i != l) (li : l != i) (jl : j != l) (lj : l != j) (kl : k != l) (lk : l != k).
 
@@ -290,13 +306,13 @@ Lemma Z3R: forall i j k a b c(ij : i!=j) (jk : j!=k) (ik : i!=k) (ki : k!=i) (kj
       (X' ij (b *_ a) .* X' kj a) ^ X jk (c * b) .*
       X' kj (-_ a) .* X' ki (-_ (a _* c)). Admitted.
 
-(* REFACTORING STOPPED HERE *)
-
 Section ActionCommutation1.
 Context (i j k l : nat) {a a1 a2 : I} {b c d : R} 
         {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j}.
 
-Lemma ACL01: (Z' ji a d ^ X ik (b)) ^ X ij (c) = (Z' ji a d ^ X ij (c)) ^ X ik (b).
+(* REFACTORING STOPPED HERE *)
+
+Lemma ACL01: (Z' ji a d ^^ X ik (b)) ^^ X ij (c) = (Z' ji a d ^^ X ij (c)) ^^ X ik (b).
 intros. rewrite ZC3// mul_conj -(swapI ij) ZC2 ?swapI mul_conj XC4'// XC3'// ZC3 -?GA//.
 do 2 apply GCr'. by rewrite X0; collect. Qed.
 
