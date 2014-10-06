@@ -330,6 +330,21 @@ ZCR0. by rewrite X'def ZC5_swap' // X0 inv_l' X'zero IdG. Qed.
 Lemma Z2_00': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X lk c) = (Z' ij a1 b ^^ X kl a2) ^^ (X lk c).
 ZCR0. by rewrite GA Z1 // -GA Z'Inv; cancel. Qed.
 
+Lemma Z2_00'': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X kl c) = (Z' ij a1 b ^^ X kl a2) ^^ (X kl c).
+ZCR0. by rewrite ?XC1 (ZC5_swap' i j) // ?X'Inv; cancel. Qed.
+
+Lemma Z2_00''': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X ij c) = (Z' ij a1 b ^^ X kl a2) ^^ (X ij c).
+ZCR0. rewrite ?(ZC1 _ _ m) //. ZCR0. rsimpl. rewrite -?GA.
+do 2(repeat (rewrite ?(XC5_swap k l) ?(XC5_swap' k l)//); rewrite -(ZC5_swap' _ _ k l) //). 
+by rewrite X0' inv_l' X'zero GId. Qed.
+
+Lemma Z2_04: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X ik c) = (Z' ij a1 b ^^ X kl a2) ^^ (X ik c).
+ZCR0. rewrite ?X'zero ?IdG -?GA ?X'def.
+rewrite XC4_swap // (XC5_swap' i l j k) //.
+rewrite (XC4'_swap' i l k) // ZC4'_swap' // X0'; rsimpl.
+rewrite -plus_assoc' inv_r' plus_0_l'.
+rewrite ZC5_swap' //. bite. Abort.
+
 Lemma Z2_01: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X mn c) = (Z' ij a1 b ^^ X kl a2) ^^ (X mn c).
 ZCR0. by rewrite GA ZC5_swap // -GA X'Inv; cancel. Qed.
 
