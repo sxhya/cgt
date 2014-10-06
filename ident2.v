@@ -18,12 +18,21 @@ Section Axioms.
 Context (i j k l : nat) {a a1 a2 : I} (b c : R).
 
 (* Definition of the action of the Steinberg group on relative generators *)
-(* Don't use it *)
+(* Don't use it 
 Axiom ZC1: forall (ij : i!=j) (jk : j!=k) (ik : i!=k) (ji : j!=i) (kj : k!=j) (ki : k!=i), 
       Z' ij a b ^^ X ij c =
-      X' ji (- b *_ a _* b) ^^ X ik (- c * b - 1) .* Z' ki (a _* b) (- c * b - 1) .*
-      X' ij ((c * b + 1) *_ a _* (b * c + 1)) ^^ X jk b .* Z' kj (a _* (b * c + 1)) b .*
-      X' kj (-_ a) .* X' ki (-_ a _* b) ^^ X ij c.
+      X' ji (- b *_ a _* b) ^^ X ik (- c * b - 1)       .*
+                     Z' ki (a _* b) (- c * b - 1)       .*
+      X' ij ((c * b + 1) *_ a _* (b * c + 1)) ^^ X jk b .* 
+                             Z' kj (a _* (b * c + 1)) b .*
+      X' kj (-_ a) .* X' ki (-_ a _* b) ^^ X ij c. *)
+
+Axiom ZC1: forall (ij : i!=j) (jk : j!=k) (ik : i!=k) (ji : j!=i) (kj : k!=j) (ki : k!=i), 
+Z' ij a b ^^ X ij c = 
+     X' ki (a _* b) .*
+     X' kj (a _* (b * c + 1)) .*
+     X' kj (-_ (a _* (b * c + 1))) ^^ X jk (- b) ^^ X ik (c * b + 1) .*
+     X' ki (-_ (a _* b))           ^^ X jk (- b) ^^ X ik (c * b + 1).
 
 Axiom ZC2: forall (ij : i != j) (ji : j != i),
       (Z' ij a b) ^^ (X ji c) = Z' ij a (b + c).
@@ -283,9 +292,13 @@ Lemma Z0_ZC5: (Z' ij (a1 _+_ a2) b) ^^ (X kl c) =
               (Z' ij (a1) b) ^^ (X kl c) .* (Z' ij (a2) b) ^^ (X kl c).
 by rewrite ?ZC5 // Z0. Qed.
 
-(* This is not that simple *)
-Lemma Z0_ZC1: (Z' ij (a1 _+_ a2) b) ^^ (X ij c) = (Z' ij (a1) b) ^^ (X ij c) .* (Z' ij (a2) b) ^^ (X ij c).
+Import AxiomLevel3.
 
+(* This is not that simple *)
+Lemma Z0_ZC1: (Z' ij (a1 _+_ a2) b) ^^ (X ij c) =  (Z' ij (a1) b) ^^ (X ij c) .* (Z' ij (a2) b) ^^ (X ij c).
+rewrite ?(ZC1 _ _ k) //.
+ + rewrite dist_r'' -X0. bite.
+ + rewrite {1}dist_r'' -X0 -?GA XC4'_swap //. bite. 
 Abort.
 
 End Z0_ZC.
@@ -309,6 +322,8 @@ Context (i j k l m n : nat) {a a1 a2 : I} {b c d : R}
         {ni : n != i}  {nj : n != j} {nk : n != k} {nl : n != l} {nm : n != m}
         {in' : i != n} {jn : j != n} {kn : k != n} {ln : l != n} {mn : m != n}.
 
+(* Preservation of Z2 (ZC5 flavour) *)
+
 Lemma Z2_00: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X ji c) = (Z' ij a1 b ^^ X kl a2) ^^ (X ji c).
 ZCR0. by rewrite X'def ZC5_swap' // X0 inv_l' X'zero IdG. Qed.
 
@@ -322,8 +337,13 @@ Lemma Z2_02: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X jm c) = (Z' ij a1 b 
 ZCR0. by rewrite -?GA -?X'Inv (ZC5_swap' i j) // -?(XC5_swap' k l) // ?X'Inv; cancel. Qed.
 
 Lemma Z2_02': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X im c) = (Z' ij a1 b ^^ X kl a2) ^^ (X im c).
-ZCR0. rewrite -?GA -?X'Inv. repeat (rewrite (XC5_swap k l) //; bite).
-rewrite ?X'def Z2. by ZCR0. Qed.
+ZCR0. rewrite -?GA -?X'Inv. repeat (rewrite (XC5_swap k l) //; bite). rewrite ?X'def Z2. by ZCR0. Qed.
+
+Lemma Z2_02'': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X mj c) = (Z' ij a1 b ^^ X kl a2) ^^ (X mj c).
+ZCR0. by rewrite -?GA -?X'Inv ?X'def (ZC5_swap' i j) // -?(XC5_swap' k l) // ?X'Inv; cancel. Qed.
+
+Lemma Z2_02''': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X mi c) = (Z' ij a1 b ^^ X kl a2) ^^ (X mi c).
+ZCR0. by rewrite -?GA -?X'Inv ?X'def (ZC5_swap' i j) // -?(XC5_swap' k l) // ?X'Inv; cancel. Qed.
  
 Lemma Z2_03: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X km c) = (Z' ij a1 b ^^ X kl a2) ^^ (X km c).
 ZCR0. rewrite ?X'zero X'def; cancel. rewrite Z2. by ZCR0. Qed.

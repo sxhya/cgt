@@ -163,6 +163,9 @@ rewrite ST1''.
  Qed.
 
 *)
+
+(* [ ~ X ki (a * b) .* X kj (a * (b * c + 1)), X ik (- (c * b) - 1) .* X jk b] *)
+
 Lemma C1: (Z ij a b) ^ (X ij c) = 
    X kj (a * (b * c + 1)) .* X ki (a * b) .*
    X ik (- ((c * b + 1) * a * (b * c + 1) * b)) .* X ij ((c * b + 1) * a * (b * c + 1)) .* Z kj (- (a * (b * c + 1))) (- b) .*
