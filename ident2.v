@@ -4,8 +4,6 @@ Import Ring.RingFacts.
 Definition conj' := locked conj.
 Notation "h ^^ g" := (conj' h g) (at level 11, left associativity).
 
-Section RelSteinbergAxioms.
-
 Parameter Z': forall {i j : nat} (p : i != j) (a : I) (r : R), ZZ.
 
 Definition X' {i j : nat} (p : i != j) r := Z' p r (0).
@@ -15,6 +13,8 @@ Definition X' {i j : nat} (p : i != j) r := Z' p r (0).
 Axiom fresh2: forall (i j : nat), exists k, k!=i /\ k!=j.
 Axiom fresh3: forall (i j k : nat), exists l, l!=i /\ l!=j /\ l!=k.
 
+Module ZC_Rules.
+Section Axioms.
 Context (i j k l : nat) {a a1 a2 : I} (b c : R).
 
 (* Definition of the action of the Steinberg group on relative generators *)
@@ -42,45 +42,53 @@ Axiom ZC4': forall (ij : i!=j) (jk : j!=k) (ik : i!=k),
 
 Axiom ZC5: forall (ij : i!=j) (jk : j!=k) (ik : i!=k) (il : i!=l) (jl : j!=l) (kl : k!=l),
       (Z' ij a b) ^^ (X kl c) = Z' ij a b.
+End Axioms.
+End ZC_Rules.
 
 (* Definition of Relations between relative generators *)
 
-Axiom Z0: forall (ij : i!=j), Z' ij (a1 _+_ a2) c = Z' ij a1 c .* Z' ij a2 c.
+Module AxiomLevel0.
+Axiom Z0: forall (i j : nat) a1 a2 b (ij : i!=j), Z' ij (a1 _+_ a2) b = Z' ij a1 b .* Z' ij a2 b. 
+End AxiomLevel0.
 
-Axiom Z1: forall {ij : i != j} {ik : i != k} {jk : j != k} {kl : k != l} {il : i != l} {jl : j != l}
+Module AxiomLevel1. Export AxiomLevel0 ZC_Rules.
+Axiom Z2: forall (i j k l : nat) a a1 b (ij : i!=j) (kl : k!=l), 
+      (X' kl (-_a1) .* Z' ij a b .* X' kl a1) = Z' ij a b ^^ X kl a1. 
+End AxiomLevel1.
+
+Module AxiomLevel2. Export AxiomLevel1.
+Axiom Z1: forall (i j k l : nat) a1 a2 b c {ij : i != j} {ik : i != k} {jk : j != k} {kl : k != l} {il : i != l} {jl : j != l}
                  {ji : j != i} {ki : k != i} {kj : k != j} {lk : l != k} {li : l != i} {lj : l != j},
           Z' ij a1 b .* Z' kl a2 c = Z' kl a2 c .* Z' ij a1 b.
+End AxiomLevel2.
 
-Axiom Z2: forall (ij : i!=j) (kl : k!=l), 
-      Z' ij a b ^ X' kl a1 = Z' ij a b ^^ X kl a1.
-
-Axiom Z3R': forall (ij : i!=j) (jk : j!=k) (ik : i!=k) (ki : k!=i) (kj : k!=j) (ji : j!=i),
+Module AxiomLevel3. Export AxiomLevel2.
+Axiom Z3R': forall (i j k l : nat) a b c (ij : i!=j) (jk : j!=k) (ik : i!=k) (ki : k!=i) (kj : k!=j) (ji : j!=i),
        (X' kj a ^^ X ik (- b)) ^^ X ji c =
       ((X' kj a ^^ X ji c) ^^ X ik (- b)) ^^ X jk (c * b).
+End AxiomLevel3.
 
-End RelSteinbergAxioms.
+Section BasicLemmata. Import AxiomLevel0.
 
-Lemma Z'zero i j b (ij : i != j):
-      Z' ij 0 b = Id.
+Context (i j : nat) (a : I) (ij : i!=j).
+
+Lemma Z'zero: forall b, Z' ij 0 b = Id.
 intros. apply (GCr (Z' ij 0 b)). rewrite -Z0. by rewrite IdG; rsimpl. Qed.
 
-Lemma Z'Inv i j a b (ij : i != j):
-      Z' ij (-_a) b = (Z' ij a b)^-1.
-apply (GCr (Z' ij a b)). by rewrite -Z0 inv_l' IG Z'zero. Qed.
+Lemma Z'Inv: forall b, Z' ij (-_a) b = (Z' ij a b)^-1.
+intros. apply (GCr (Z' ij a b)). by rewrite -Z0 inv_l' IG Z'zero. Qed.
 
-Lemma X'def i j a (ij : i != j):
-      Z' ij a 0 = X' ij a. 
-done. Qed.
+Lemma X'def: Z' ij a 0 = X' ij a.  done. Qed.
 
-Lemma X'zero i j (ij : i != j):
-      X' ij 0 = Id. 
+Lemma X'zero: X' ij 0 = Id. 
 by rewrite /X' Z'zero. Qed.
 
-Lemma X'Inv i j (ij : i != j) a:
-      X' ij (-_a) = (X' ij a)^-1. 
+Lemma X'Inv: X' ij (-_a) = (X' ij a)^-1. 
 by rewrite /X' Z'Inv. Qed.
 
-Section XCorollaries.
+End BasicLemmata.
+
+Section XCorollaries. Import AxiomLevel1.
 
 Context (i j k l : nat) {a a1 a2 : I} {b c d : R} 
         {ij : i != j} {ik : i != k} {jk : j != k} {kl : k != l} {il : i != l} {jl : j != l}
@@ -115,10 +123,12 @@ Corollary XC5: (X' ij a) ^^ (X kl c) = X' ij a.
 by ZX ZC5. Qed.
 
 Corollary XC4_swap: (X' ij a1) .* (X' kj a2) = (X' kj a2) .* (X' ij a1).
-by rewrite /X' {1}swap_comm comm_d1 -Z'Inv Z2 ZC4; rsimpl; rewrite /X' ?Z'zero; cancel. Qed. 
+rewrite {1}swap_comm comm_d1 -X'Inv. cancel. rewrite /conj -X'Inv.
+rewrite {2}/X' Z2 ZC4. rsimpl. rewrite ?X'zero X'def. by cancel. Qed.
 
 Corollary XC4'_swap: (X' ij a1) .* (X' ik a2) = (X' ik a2) .* (X' ij a1).
-by rewrite /X' {1}swap_comm comm_d1 -Z'Inv Z2 ZC4'; rsimpl; rewrite /X' ?Z'zero; cancel. Qed.
+rewrite {1}swap_comm comm_d1 -X'Inv. cancel. rewrite /conj -X'Inv.
+rewrite {2}/X' Z2 ZC4'. rsimpl. rewrite ?X'zero X'def. by cancel. Qed.
 
 Corollary XC4_swap': forall (g : ZZ), g .* (X' ij a1) .* (X' kj a2) = g .* (X' kj a2) .* (X' ij a1).
 intros. by rewrite GA XC4_swap ?GA. Qed.
@@ -127,17 +137,14 @@ Corollary XC4'_swap': forall (g : ZZ), g .* (X' ij a1) .* (X' ik a2) = g .* (X' 
 intros. by rewrite GA XC4'_swap ?GA. Qed.
 
 Corollary XC5_swap: (X' ij a1) .* (X' kl a2) =  (X' kl a2) .* (X' ij a1).
-by rewrite /X' {1}swap_comm comm_d1 -?Z'Inv ?X'def Z2 ZC5 // X'def X'Inv; cancellate. Qed.
+rewrite {1}swap_comm comm_d1 -X'Inv. cancel. by rewrite /conj -X'Inv {2}/X' Z2 ZC5. Qed.
 
 Corollary XC5_swap' g: g .* (X' ij a1) .* (X' kl a2) = g .* (X' kl a2) .* (X' ij a1).
 by rewrite ?GA XC5_swap. Qed.
 
 End XCorollaries.
 
-Section SwapLemmata.
-
-(* assume rank >= 2*)
-
+Section SwapLemmata. Export AxiomLevel1.
 Context (i j k l : nat) {a a1 a2 : I} {b c d : R} 
         {ij : i != j} {ik : i != k} {jk : j != k} {kl : k != l} {il : i != l} {jl : j != l}
         {ji : j != i} {ki : k != i} {kj : k != j} {lk : l != k} {li : l != i} {lj : l != j}.
@@ -150,9 +157,8 @@ by rewrite X0' inv_r' X'zero GId. Qed. *)
 
 Corollary ZC3_swap: (Z' ij a b) .* (X' jk a1) =
  (X' jk ((1 - b * a) *_ a1)) .* X' ik (a _* a1) .* Z' ij a b.
-apply (GCl ((X' jk a1)^-1)). 
-rewrite -?GA. by rewrite conj_def {1}/X' Z2 ZC3// dist_r' mul_1_l' -X0;
-     cancellate; rsimpl. Qed.
+apply (GCl (X' jk (-_a1))). rewrite -?GA.
+by rewrite Z2 X0 dist_r'; rsimpl; rewrite -plus_assoc' inv_l' ZC3; rsimpl. Qed.
 
 Corollary ZC3_swap' g: g .* (Z' ij a b) .* (X' jk a1) =
  g .* (X' jk ((1 - b * a) *_ a1)) .* X' ik (a _* a1) .* Z' ij a b.
@@ -160,8 +166,8 @@ by rewrite GA ZC3_swap ?GA. Qed.
 
 Corollary ZC4'_swap: (Z' ij a b) .* (X' ik a1) = 
  X' ik (a1 _+_ a * b *_ a1) .* X' jk (-_ (b * a * b *_ a1)) .* Z' ij a b.
-apply (GCl ((X' ik a1)^-1)). rewrite -X0; cancellate.
-by rewrite conj_def Z2 ZC4' XC4_swap; rsimpl. Qed.
+apply (GCl (X' ik (-_a1))). rewrite -X0; cancellate.
+by rewrite Z2 ZC4' X0 X0 XC4_swap // inv_l' plus_0_l'; rsimpl. Qed.
 
 Corollary ZC4'_swap' g: g .* (Z' ij a b) .* (X' ik a1) = 
 g .* X' ik (a1 _+_ a * b *_ a1) .* X' jk (-_ (b * a * b *_ a1)) .* Z' ij a b.
@@ -169,8 +175,8 @@ by rewrite GA ZC4'_swap ?GA. Qed.
 
 Corollary ZC3'_swap: (Z' ij a b) .* (X' ki a1) = 
  (X' ki a1) .* X' ki (-_ (a1 _* a _* b)) .* X' kj (-_ (a1 _* a)) .* Z' ij a b.
-apply (GCl ((X' ki a1)^-1)). cancellate.
-by rewrite conj_def Z2 ZC3'; rsimpl. Qed.
+apply (GCl (X' ki (-_a1))). cancellate.
+by rewrite X0 inv_l' X'zero IdG Z2 ZC3'; rsimpl. Qed.
 
 Corollary ZC3'_swap' g: g .* (Z' ij a b) .* (X' ki a1) = 
  g .* (X' ki a1) .* X' ki (-_ (a1 _* a _* b)) .* X' kj (-_ (a1 _* a)) .* Z' ij a b.
@@ -179,8 +185,8 @@ by rewrite GA ZC3'_swap ?GA. Qed.
 Corollary ZC4_swap:
  (Z' ij a b) .* (X' kj a1) =
  (X' kj a1) .* X' ki (a1 _* b _* a _* b) .* X' kj (a1 _* b _* a) .* Z' ij a b.
-apply (GCl ((X' kj a1)^-1)). cancellate.
-by rewrite conj_def Z2 ZC4; rsimpl. Qed.
+apply (GCl ((X' kj (-_a1)))). cancellate.
+by rewrite Z2 ZC4 X0 inv_l' X'zero IdG; rsimpl. Qed.
 
 Corollary ZC4_swap' g:
  g .* (Z' ij a b) .* (X' kj a1) =
@@ -189,14 +195,16 @@ by rewrite GA ZC4_swap ?GA. Qed.
 
 Corollary ZC5_swap:
  (Z' ij a b) .* (X' kl a1) = (X' kl a1) .* (Z' ij a b).
-apply (GCl ((X' kl a1) ^-1)). rewrite -?GA; cancellate.
-by rewrite ?conj_def Z2 ZC5. Qed.
+apply (GCl (X' kl (-_a1))). rewrite -?GA; cancellate.
+by rewrite Z2 ZC5 // X0 inv_l' X'zero IdG. Qed.
 
 Corollary ZC5_swap' g: 
  g .* (Z' ij a b) .* (X' kl a1) = g .* (X' kl a1) .* (Z' ij a b).
 by rewrite ?GA ZC5_swap. Qed.
 
 End SwapLemmata.
+
+Module ZC_tactic. Export ZC_Rules.
 
 Ltac Z_guard :=
   match goal with
@@ -212,23 +220,83 @@ Tactic Notation "safe_rw4" reference(F1) "," reference(F2) ","
   safe_rw F1; safe_rw F2; safe_rw F3; safe_rw F4.
 
 Axiom forward_rule: forall h1 h2 g, conj' (h1 .* h2) g = (conj' h1 g) .* (conj' h2 g). 
+Axiom identity_rule: forall h, conj' Id h = Id.
 
-(*TODO: This definition is impure: we are not only computing but also use 
-        some simple relations in Steinberg group all along.
-        These two activities should not be done at the same time 
-        (at least unless we prove proper correctness lemmata) *)
-
-Ltac ZC := rewrite -?X'Inv -?Z'Inv ?XC1; 
+Ltac pure_ZC :=
            safe_rw4 XC2,  ZC2,  XC3, ZC3;
            safe_rw4 XC3', ZC3', XC4, ZC4;
            safe_rw4 XC4', ZC4', XC5, ZC5;
-           rewrite ?forward_rule ?X'def ?X'Inv ?Z'Inv; rsimpl;
-           rewrite ?Z'zero ?X'zero; cancel;
-           rewrite -?GA.
+           rewrite ?forward_rule ?identity_rule; rsimpl; cancel.
+Ltac ZCR0 := repeat pure_ZC.
 
-Ltac ZCR := repeat ZC.
+End ZC_tactic.
 
-Section Z2_ZC.
+Section Z0_ZC. Import ZC_tactic AxiomLevel1.
+Context (i j k : nat) (a a1 a2 : I) (b c : R)
+(ij : i != j) (ik : i != k) (jk : j != k) (ji : j != i) (ki : k != i) (kj : k != j).
+
+(* Boilerplate lemmata about preservation of Relation Z0 *)
+
+Lemma Z0_ZC2: (Z' ij (a1 _+_ a2) b) ^^ (X ji c) = (Z' ij (a1) b) ^^ (X ji c) .* (Z' ij (a2) b) ^^ (X ji c).
+ZCR0. by rewrite Z0. Qed.
+
+Lemma Z0_ZC3: (Z' ij (a1 _+_ a2) b) ^^ (X jk c) = (Z' ij (a1) b) ^^ (X jk c) .* (Z' ij (a2) b) ^^ (X jk c).
+ZCR0. 
+rewrite -?X'Inv; rexpand; rewrite -?X0 Z0; bite.
+rewrite XC4_swap //; bite.
+rewrite ZC3_swap //; rexpand; rsimpl; rewrite -X0; bite.
+rewrite ZC4'_swap' // X0' XC4_swap // plus_comm' plus_assoc'.
+rsimpl. rewrite inv_r' plus_0_r'. bite.
+by rewrite X0 inv_r' X'zero IdG. Qed.
+
+Lemma Z0_ZC3': (Z' ij (a1 _+_ a2) b) ^^ (X ki c) = (Z' ij a1 b) ^^ (X ki c) .* (Z' ij a2 b) ^^ (X ki c).
+ZCR0. 
+rewrite -?X'Inv; rexpand; rewrite -X0 Z0. bite.
+rewrite XC4'_swap // -X0; bite.
+rewrite ZC3'_swap // XC4'_swap //. bite. 
+rewrite ZC4_swap' ?X0'. bite.
+rewrite ?X0' XC4'_swap' ?X0' // XC4'_swap // plus_comm' -?plus_assoc'.
+rsimpl. by rewrite inv_l' plus_0_l' ?X0' inv_r' X'zero GId. Qed.
+
+Lemma Z0_ZC4: (Z' ij (a1 _+_ a2) b) ^^ (X kj c) = (Z' ij a1 b) ^^ (X kj c) .* (Z' ij a2 b) ^^ (X kj c).
+ZCR0. 
+rexpand. rewrite -X0 Z0. bite.
+rewrite XC4'_swap // -X0. bite.
+rewrite ZC3'_swap // X0.
+rewrite ZC4_swap' // X0'. bite. rsimpl.
+rewrite XC4'_swap // -X0. bite.
+by rewrite XC4'_swap // X0' inv_l' X'zero GId X0 plus_comm'
+        -?plus_assoc' inv_r' plus_0_l'. Qed.
+
+Lemma Z0_ZC4' : (Z' ij (a1 _+_ a2) b) ^^ (X ik c) = (Z' ij a1 b) ^^ (X ik c) .* (Z' ij a2 b) ^^ (X ik c).
+ZCR0. 
+rewrite -?X'Inv. rexpand. rewrite -X0 Z0. bite.
+rewrite XC4_swap // -X0. bite.
+rewrite ZC3_swap // ZC4'_swap' // ?X0'. bite.
+rewrite XC4_swap' // X0 XC4_swap //. rexpand. rsimpl.
+rewrite plus_assoc' inv_r'  plus_0_r' (plus_comm' (a2 _* b _* c)) -plus_assoc'. rsimpl.
+by rewrite inv_l' plus_0_l'. Qed.
+
+Context (l : nat) (il : i != l) (li : l != i) (jl : j != l) (lj : l != j) (kl : k != l) (lk : l != k).
+
+Lemma Z0_ZC5: (Z' ij (a1 _+_ a2) b) ^^ (X kl c) = 
+              (Z' ij (a1) b) ^^ (X kl c) .* (Z' ij (a2) b) ^^ (X kl c).
+by rewrite ?ZC5 // Z0. Qed.
+
+(* This is not that simple *)
+Lemma Z0_ZC1: (Z' ij (a1 _+_ a2) b) ^^ (X ij c) = (Z' ij (a1) b) ^^ (X ij c) .* (Z' ij (a2) b) ^^ (X ij c).
+
+Abort.
+
+End Z0_ZC.
+
+Section Z2_ZC. Import ZC_tactic AxiomLevel2.
+
+(* Ltac ZC := rewrite -?X'Inv -?Z'Inv ?XC1; pure_ZC;
+           rewrite ?X'def ?X'Inv ?Z'Inv; rsimpl;
+           rewrite ?Z'zero ?X'zero -?GA; cancel.
+
+Ltac ZCR := repeat ZC. *)
 
 Context (i j k l m n : nat) {a a1 a2 : I} {b c d : R} 
         {ij : i != j} {ji : j != i} 
@@ -241,96 +309,27 @@ Context (i j k l m n : nat) {a a1 a2 : I} {b c d : R}
         {ni : n != i}  {nj : n != j} {nk : n != k} {nl : n != l} {nm : n != m}
         {in' : i != n} {jn : j != n} {kn : k != n} {ln : l != n} {mn : m != n}.
 
-Lemma Z2_00: (Z' ij a1 b ^ X' kl a2) ^^ (X ji c) = (Z' ij a1 b ^^ X kl a2) ^^ (X ji c).
-rewrite /conj. ZCR. by rewrite GA ZC5_swap // -GA; cancel. Qed.
+Lemma Z2_00: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X ji c) = (Z' ij a1 b ^^ X kl a2) ^^ (X ji c).
+ZCR0. by rewrite X'def ZC5_swap' // X0 inv_l' X'zero IdG. Qed.
 
-Lemma Z2_99: (Z' ij a1 b ^ X' kl a2) ^^ (X ij c) = (Z' ij a1 b ^^ X kl a2) ^^ (X ij c).
-rewrite /conj. ZCR. rewrite (ZC1 _ _ k). ZCR. rewrite -?GA.
-rewrite -?X'Inv.
-rewrite (XC4'_swap' k i l) //; bite.
-do 2 (rewrite (XC4'_swap' k j l) //; bite).
-rewrite (ZC4'_swap' k j l) //; bite.
-rewrite (ZC3'_swap) //; rsimpl. bite. rewrite X'zero IdG ?X'def.
-rewrite (XC5_swap' k l j i) // (XC4'_swap) //. bite. 
-(* Invent lemmata about swapping Z with X a la ZC4 but in opposite direction *)
-Abort.
+Lemma Z2_00': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X lk c) = (Z' ij a1 b ^^ X kl a2) ^^ (X lk c).
+ZCR0. by rewrite GA Z1 // -GA Z'Inv; cancel. Qed.
 
-Lemma Z2_00': (Z' ij a1 b ^ X' kl a2) ^^ (X lk c) = (Z' ij a1 b ^^ X kl a2) ^^ (X lk c).
-rewrite /conj. ZCR. by rewrite GA Z1 // -GA; cancel. Qed.
+Lemma Z2_01: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X mn c) = (Z' ij a1 b ^^ X kl a2) ^^ (X mn c).
+ZCR0. by rewrite GA ZC5_swap // -GA X'Inv; cancel. Qed.
 
-Lemma Z2_01: (Z' ij a1 b ^ X' kl a2) ^^ (X mn c) = (Z' ij a1 b ^^ X kl a2) ^^ (X mn c).
-rewrite /conj. ZCR. by rewrite GA ZC5_swap // -GA; cancel. Qed.
+Lemma Z2_02: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X jm c) = (Z' ij a1 b ^^ X kl a2) ^^ (X jm c).
+ZCR0. by rewrite -?GA -?X'Inv (ZC5_swap' i j) // -?(XC5_swap' k l) // ?X'Inv; cancel. Qed.
 
-Lemma Z2_02: (Z' ij a1 b ^ X' kl a2) ^^ (X jm c) = (Z' ij a1 b ^^ X kl a2) ^^ (X jm c).
-rewrite /conj. ZCR. by rewrite -?GA -?X'Inv (ZC5_swap' i j) // -?(XC5_swap' k l) // ?X'Inv; cancel. Qed.
-
-Lemma Z2_02': (Z' ij a1 b ^ X' kl a2) ^^ (X im c) = (Z' ij a1 b ^^ X kl a2) ^^ (X im c).
-rewrite /conj. ZCR. rewrite -?GA -?X'Inv. repeat (rewrite (XC5_swap k l) //; bite).
-rewrite X'Inv conj_def Z2. by ZCR. Qed.
+Lemma Z2_02': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X im c) = (Z' ij a1 b ^^ X kl a2) ^^ (X im c).
+ZCR0. rewrite -?GA -?X'Inv. repeat (rewrite (XC5_swap k l) //; bite).
+rewrite ?X'def Z2. by ZCR0. Qed.
  
-Lemma Z2_03: (Z' ij a1 b ^ X' kl a2) ^^ (X km c) = (Z' ij a1 b ^^ X kl a2) ^^ (X km c).
-rewrite /conj. do 2ZC. by rewrite -X'Inv -ZC5_swap // X'Inv GA; cancel. Qed.
+Lemma Z2_03: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X km c) = (Z' ij a1 b ^^ X kl a2) ^^ (X km c).
+ZCR0. rewrite ?X'zero X'def; cancel. rewrite Z2. by ZCR0. Qed.
 
 End Z2_ZC.
 
-Section Z0_ZC.
-
-Context (i j k : nat) (a a1 a2 : I) (b c : R)
-(ij : i != j) (ik : i != k) (jk : j != k) (ji : j != i) (ki : k != i) (kj : k != j).
-
-(* Boilerplate lemmata about preservation of Relation Z0 *)
-
-Lemma Z0_ZC2: (Z' ij (a1 _+_ a2) b) ^^ (X ji c) = (Z' ij (a1) b) ^^ (X ji c) .* (Z' ij (a2) b) ^^ (X ji c).
-ZCR. by rewrite Z0. Qed.
-
-Lemma Z0_ZC3: (Z' ij (a1 _+_ a2) b) ^^ (X jk c) = (Z' ij (a1) b) ^^ (X jk c) .* (Z' ij (a2) b) ^^ (X jk c).
-ZCR. 
-rewrite -?X'Inv; rexpand; rewrite -?X0 Z0; bite.
-rewrite XC4_swap //; bite.
-rewrite ZC3_swap //; rexpand; rsimpl; rewrite -X0; bite.
-rewrite ZC4'_swap' // X0' XC4_swap // plus_comm' plus_assoc'.
-rsimpl. rewrite inv_r' plus_0_r'. bite.
-by rewrite X0 inv_r' X'zero IdG. Qed.
-
-Lemma Z0_ZC3': (Z' ij (a1 _+_ a2) b) ^^ (X ki c) = (Z' ij a1 b) ^^ (X ki c) .* (Z' ij a2 b) ^^ (X ki c).
-ZCR. 
-rewrite -?X'Inv; rexpand; rewrite -X0 Z0. bite.
-rewrite XC4'_swap // -X0; bite.
-rewrite ZC3'_swap // XC4'_swap //. bite. 
-rewrite ZC4_swap' ?X0'. bite.
-rewrite ?X0' XC4'_swap' ?X0' // XC4'_swap // plus_comm' -?plus_assoc'.
-rsimpl. by rewrite inv_l' plus_0_l' ?X0' inv_r' X'zero GId. Qed.
-
-Lemma Z0_ZC4: (Z' ij (a1 _+_ a2) b) ^^ (X kj c) = (Z' ij a1 b) ^^ (X kj c) .* (Z' ij a2 b) ^^ (X kj c).
-ZCR. 
-rexpand. rewrite -X0 Z0. bite.
-rewrite XC4'_swap // -X0. bite.
-rewrite ZC3'_swap // X0.
-rewrite ZC4_swap' // X0'. bite. rsimpl.
-rewrite XC4'_swap // -X0. bite.
-by rewrite XC4'_swap // X0' inv_l' X'zero GId X0 plus_comm'
-        -?plus_assoc' inv_r' plus_0_l'. Qed.
-
-Lemma Z0_ZC4' : (Z' ij (a1 _+_ a2) b) ^^ (X ik c) = (Z' ij a1 b) ^^ (X ik c) .* (Z' ij a2 b) ^^ (X ik c).
-ZCR. 
-rewrite -?X'Inv. rexpand. rewrite -X0 Z0. bite.
-rewrite XC4_swap // -X0. bite.
-rewrite ZC3_swap // ZC4'_swap' // ?X0'. bite.
-rewrite XC4_swap' // X0 XC4_swap //. rexpand. rsimpl.
-rewrite plus_assoc' inv_r'  plus_0_r' (plus_comm' (a2 _* b _* c)) -plus_assoc'. rsimpl.
-by rewrite inv_l' plus_0_l'. Qed.
-
-(* This is not that simple *)
-Lemma Z0_ZC1: (Z' ij (a1 _+_ a2) b) ^^ (X ij c) = (Z' ij (a1) b) ^^ (X ij c) .* (Z' ij (a2) b) ^^ (X ij c).
-Abort.
-
-Context (l : nat) (il : i != l) (li : l != i) (jl : j != l) (lj : l != j) (kl : k != l) (lk : l != k).
-
-Lemma Z0_ZC5: (Z' ij (a1 _+_ a2) b) ^^ (X kl c) = 
-              (Z' ij (a1) b) ^^ (X kl c) .* (Z' ij (a2) b) ^^ (X kl c).
-by rewrite ?ZC5 // Z0. Qed.
-
-End Z0_ZC.
 
 Lemma Z3R: forall i j k a b c(ij : i!=j) (jk : j!=k) (ik : i!=k) (ki : k!=i) (kj : k!=j) (ji : j!=i),
       Z' ij (b *_ a) c = (X' ji (-_ (c * b *_ a _* c)) .* X' ki (a _* c)) ^ X ik (- b) .*
@@ -396,17 +395,17 @@ rewrite XC3' // XC3 // {1} mul_conj ; rsimpl.
 rewrite X1. move /(GCr' ((X' kj a ^ (X ji c)) ^-1)). cancel.
 move => ->. by rewrite -?conjI -?X'Inv -(XC3 k j i). Qed. *)
 
-Lemma ACL1: ((X' ji a1 .* X' ki a2) ^^ X ik b) ^^ X ij c = 
-            ((X' ji a1 .* X' ki a2) ^^ X ij c) ^^ X ik b.
-by rewrite 2!mul_conj -ACL01' // ACL01' // 2!mul_conj. Qed.
+(* Lemma ACL1: (X' ji a1 ^^ X ik b) ^^ X ij c .* (X' ki a2 ^^ X ik b) ^^ X ij c = 
+            (X' ji a1 ^^ X ij c) ^^ X ik b .* (X' ki a2 ^^ X ij c) ^^ X ik b.
+by rewrite -?ACL01'. Qed.
 
-Lemma ACL2: ((Z' ji a1 b .* X' kj a2 .* X' ki a3) ^ X ik d) ^ X ij c = 
-            ((Z' ji a1 b .* X' kj a2 .* X' ki a3) ^ X ij c) ^ X ik d.
+Lemma ACL2: ((Z' ji a1 b) ^ X ik d) ^ X ij c .* X' kj a2 .* X' ki a3 = 
+            ((Z' ji a1 b) ^ X ij c) ^ X ik d.
 intros. by rewrite 4!mul_conj ACL01// -ACL02'// -ACL01'// -?mul_conj. Qed.
 
 Lemma ACL4': ((X' ki a1 .* X' kj a2) ^ X ik c) ^ X jk b = 
              ((X' ki a1 .* X' kj a2) ^ X jk b) ^ X ik c.
-intros. rewrite 4!mul_conj -ACL04' // -ACL04' //. Qed.
+intros. rewrite 4!mul_conj -ACL04' // -ACL04' //. Qed. *)
 
 End ActionCommutation3.
 
@@ -415,8 +414,8 @@ Section ActionCommutation4.
 Context (i j k l : nat) {a a1 a2 a3 : I} {b c d : R} 
         {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j}.
 
-Lemma ACL3: (((X' ji a1 .* X' ki a2) ^ X ik b) ^ X ij c) ^ (X ij d) =
-             ((X' ji a1 .* X' ki a2) ^ X ik b) ^ (X ij (c+d)).
+(* Lemma ACL3: (((X' ji a1 .* X' ki a2) ^^ X ik b) ^ X ij c) ^ (X ij d) =
+             ((X' ji a1 .* X' ki a2) ^^ X ik b) ^ (X ij (c+d)).
 intros.
 by rewrite ACL1 // mul_conj X1 XC3// -GA ACL1 // ACL2//
  (mul_conj (X ij (c+d))) X1 XC3// ?(mul_conj (X ij d))
@@ -427,7 +426,7 @@ Lemma ACL3': (((X' ij a1 .* X' kj a2) ^ X jk b) ^ X ij c) ^ X ij (d) =
 intros. rewrite 4!mul_conj; do 3 rewrite ACL03'// (XC1 _ _ k)//.
 apply GCl'. rewrite X1 2!ZC4 2!mul_conj ZC4' ZC4 (XC1 _ _ k)//; rsimpl.
 by rewrite ?X'zero ?IdG ?X'def -2!GA XC4'_swap'// 
-           X0' XC4'_swap// X0' XC4'_swap; collect. Qed.
+           X0' XC4'_swap// X0' XC4'_swap; collect. Qed. *)
 
 End ActionCommutation4.
 
@@ -437,7 +436,10 @@ Context (i j k l : nat) {a a1 a2 a3 : I} {b c d : R}
         {ij : i != j} {ik : i != k} {jk : j != k} {ji : j != i} {ki : k != i} {kj : k != j}.
 
 Lemma ActionLemma1:
- (Z' ij a b ^ X ij c) ^ X ij d = Z' ij a b ^ X ij (c+d). 
+ (Z' ij a b ^^ X ij c) ^^ X ij d = Z' ij a b ^^ X ij (c+d).
+
+rewrite ?(ZC1 _ _ k) //. ZCR. rewrite -?X'Inv -?Z'Inv. rsimpl.
+rewrite ?X0' ?X0. collect. bite.
 
 intros. rewrite -(mul_1_l' a) (Z3R _ _ k); rsimpl.
 rewrite 3!(mul_conj (X ij c)) 3!(mul_conj (X ij d)) 3!(mul_conj (X ij (c+d))).
