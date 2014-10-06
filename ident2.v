@@ -441,6 +441,15 @@ by rewrite (XC4_swap' k l m) // ?X0 ?X0' inv_r' inv_l' ?X'zero ?IdG. Qed.
 Lemma Z2_03''': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X ml c) = (Z' ij a1 b ^^ X kl a2) ^^ (X ml c).
 ZCR0. rewrite ?X'zero X'def -?GA; cancel. by rewrite (ZC5_swap' i j) // X0 inv_l' X'zero IdG. Qed.
 
+(* Preservation of Z2 (ZC2 flavour) *)
+
+Lemma Z2_06: (X' ji (-_a2) .* Z' ij a1 b .* X' ji a2) ^^ (X ji c) = (Z' ij a1 b ^^ X ji a2) ^^ (X ji c).
+ZCR0. by rewrite ?XC1 Z2 ZC2 {1}plus_assoc (plus_comm c) -plus_assoc. Qed.
+
+(* OBSTACLE *)
+Lemma Z2_06': (X' ji (-_a2) .* Z' ij a1 b .* X' ji a2) ^^ (X ij c) = (Z' ij a1 b ^^ X ji a2) ^^ (X ij c).
+ZCR0. rewrite ?(ZC1 _ _ m). ZCR0. rsimpl. rewrite -?GA. Abort.
+
 End Z2_ZC.
 
 Lemma Z3R: forall i j k a b c(ij : i!=j) (jk : j!=k) (ik : i!=k) (ki : k!=i) (kj : k!=j) (ji : j!=i),
