@@ -28,9 +28,9 @@ Open Scope ring_scope.
 Axiom inI: forall x : I,  - embd x = (-_ x).
 Axiom pIp: forall x y : I, embd (x _+_ y) = x + y.
 Axiom mIR: forall (x : I) (y : R), embd (x _* y) = x * y.
-Axiom mRI: forall (x : I) (y : R), embd (y *_ x) = x * y.
+Axiom mRI: forall (x : I) (y : R), embd (y *_ x) = y * x.
 Axiom mIR': forall (x : R) (y : I), embd (x *_ y) = x * y.
-Axiom mRI': forall (x : R) (y : I), embd (y _* x) = x * y.
+Axiom mRI': forall (x : R) (y : I), embd (y _* x) = y * x.
 
 Axiom plus_assoc: forall a b c, (a + b) + c = a + (b + c).
 Axiom plus_assoc': forall a b c, (a _+_ b) _+_ c = a _+_ (b _+_ c).

@@ -567,15 +567,9 @@ ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA. ZCR0.
 rewrite ZC4_swap'. bite. rewrite ?X0' XC4'_swap // X0' (plus_comm' _ a1) -plus_assoc' inv_l' plus_0_l'.
 rewrite ?(XC4'_swap' k j i) ?X0' ?X0 //. rewrite plus_comm'. rsimpl. bite. by rewrite plus_comm'. Qed.
 
-(* OBSTACLE *)
+(* OBSTACLE - The only nontrivial case*)
 Lemma Z2_ZC4_02'''': (X' kj (-_a1) .* Z' ij a b .* X' kj a1) ^^ X ik c = Z' ij a b ^^ X kj a1 ^^ X ik c.
-ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA; cancel. ZCR0.
-
-move: (Z3R' i j m  a (1) b ij jm im mi mj ji). ZCR0. move /(GCr' (((X' mi (a _* b) .* X' mj a)^-1))). cancel.
-rewrite ?GIM -?X'Inv -?Z'Inv -?GA => A.
-rewrite A -?GA.
-
- Abort.
+ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA GId. Abort.
 
 (* Preservation of Z2 (ZC2 flavour) *)
 
@@ -584,11 +578,25 @@ ZCR0. by rewrite ?XC1 Z2 ZC2 {1}plus_assoc (plus_comm c) -plus_assoc. Qed.
 
 (* OBSTACLE *)
 Lemma Z2_06': (X' ji (-_a2) .* Z' ij a1 b .* X' ji a2) ^^ (X ij c) = (Z' ij a1 b ^^ X ji a2) ^^ (X ij c).
-ZCR0. rewrite ?(ZC1 _ _ m) //. rsimpl. rewrite -?GA.
-rewrite ?ZC2 ?plus_0_l.
-ZCR0. rewrite -?GA.
+ZCR0. Abort.
 
- Abort.
+Lemma Z2_07: (X' ji (-_a2) .* Z' ij a1 b .* X' ji a2) ^^ (X ik c) = (Z' ij a1 b ^^ X ji a2) ^^ (X ik c).
+ZCR0. rewrite ?X'zero ?IdG ?X'def -?GA. rexpand.
+rewrite -?X0. rewrite (XC4'_swap' j i k) //.
+rewrite X0 plus_comm' -X0. bite. apply (GCr (X' ji (-_a2))).
+rewrite ?GA (Gswap (Z' ij _ _) (X' ji (-_ a2))) /conj -X'Inv Z2.
+rewrite ZC2 plus_assoc; rsimpl. rewrite ?X'Inv. cancel.
+rewrite inv_r' plus_0_r -?X'Inv -?GA.
+rewrite ZC3_swap' //. bite. rewrite ZC3'_swap' ?X'def //. rsimpl.
+rewrite X'zero GId. rewrite ?mul_assoc'''. bite.
+rewrite (XC4'_swap' j i k) //. rewrite ?(XC4_swap' i k j) // ?X'Inv. cancel.
+rsimpl. cancel. rewrite -?X'Inv.
+rewrite XC4'_swap // X0'. rewrite -inv_mul' -dist_r'' dist_r'. rsimpl.
+rewrite -plus_assoc' inv_l' plus_0_l'.
+rewrite ZC3'_swap' // X'def. rsimpl. rewrite X'zero. bite.
+rewrite GId. rewrite XC4'_swap' //.
+rewrite ?X0 XC4'_swap //. rewrite plus_comm' -?plus_assoc'. rsimpl.
+by rewrite inv_r' plus_0_l'. Qed.
 
 End Z2_ZC.
 
