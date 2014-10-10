@@ -169,9 +169,6 @@ Corollary ZC3_swap: (Z' ij a b) .* (X' jk a1) =
 apply (GCl (X' jk (-_a1))). rewrite -?GA.
 by rewrite Z2 X0 dist_r'; rsimpl; rewrite -plus_assoc' inv_l' ZC3; rsimpl. Qed.
 
-Lemma eq_inv h g: h = g <-> h ^-1 = g ^-1.
-split. by move => ->. move /eqIdP /(GCl' h). by rewrite GId -GA GI IdG. Qed.
-
 Corollary ZC3_swap' g: g .* (Z' ij a b) .* (X' jk a1) =
  g .* (X' jk ((1 - b * a) *_ a1)) .* X' ik (a _* a1) .* Z' ij a b.
 by rewrite GA ZC3_swap ?GA. Qed.
@@ -570,6 +567,13 @@ rewrite ?(XC4'_swap' k j i) ?X0' ?X0 //. rewrite plus_comm'. rsimpl. bite. by re
 (* OBSTACLE - Nontrivial relation *)
 Lemma Z2_ZC4_02'''': (X' kj (-_a1) .* Z' ij a b .* X' kj a1) ^^ X ik c = Z' ij a b ^^ X kj a1 ^^ X ik c.
 ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA GId. Abort.
+
+Lemma Z2_ZC4_20: (X' ik (-_ a1) .* Z' ij a b .* X' ik a1) ^^ X jk c = Z' ij a b ^^ X ik a1 ^^ X jk c.
+ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA ?GId. ZCR0. bite.
+rewrite ZC4'_swap' //; rsimpl; rewrite ?X'def; bite. (* This is easy *) Admitted.
+
+Lemma Z2_ZC4_21: (X' ik (-_ a1) .* Z' ij a b .* X' ik a1) ^^ X kj c = Z' ij a b ^^ X ik a1 ^^ X kj c.
+ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA GId.
 
 (* Preservation of Z2 (ZC2 flavour) *)
 

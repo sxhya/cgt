@@ -14,7 +14,7 @@ Parameter Z': forall {i j : nat} (p : i != j) (a r : R), ZZ.
 Definition X' {i j : nat} (p : i != j) r := Z' p r (0).
 
 Section Main.
-Context (i j k l : nat) {a a1 a2 b c : R}.
+Context (i j k l : nat) (a a1 a2 b c : R).
 
 Axiom ZC1: forall (ij : i!=j) (jk : j!=k) (ik : i!=k) (ji : j!=i) (kj : k!=j) (ki : k!=i), 
      Z' ij a b ^^ X ij c = 
@@ -60,6 +60,9 @@ Axiom Z3: forall (ij : i!=j) (kj : k!=j) (jk : j!=k) (ik : i!=k),
 Axiom Z4: forall (ij : i!=j) (kj : k!=j) (ik : i!=k), 
       (X' kj (- a1) .* Z' ij a b .* X' kj a1) ^^ X ik c = Z' ij a b ^^ X kj a1 ^^ X ik c.
 
+Axiom Z4': forall (ij : i!=j) (kj : k!=j) (ik : i!=k), 
+      (X' ik (- a1) .* Z' ij a b .* X' ik a1) ^^ X kj c = Z' ij a b ^^ X ik a1 ^^ X kj c.
+
 Axiom Z5: forall (ij : i!=j) (kl : k!=l), i!=k -> i!=l -> j!=k -> j!=l ->
       Z' kl a1 b .* Z' ij a2 c = Z' ij a2 c .* Z' kl a1 b. 
 
@@ -87,23 +90,19 @@ Proof. by rewrite /X' Z'Inv. Qed.
 
 End BasicCorollaries.
 
+Ltac simplify0 := rsimpl; rewrite ?X'zero ?X'def ?forward_rule ?identity_rule -?GA; cancel.
+
 Section XC_Corollaries.
 (* Computation rules for simpler generators X_ij *)
-Ltac XC E := rewrite /X' E; rsimpl; rewrite ?X'def ?X'zero; cancel.
+Ltac XC E := rewrite /X' E; simplify0.
 
-Context (i j k l : nat) {a a1 a2 : R} (b c : R)
+Context (i j k l : nat) (a a1 a2 b c : R)
         {ij : i != j} {ji : j != i} 
         {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j} 
         {kl : k != l} {il : i != l} {jl : j != l} {lk : l != k} {li : l != i} {lj : l != j}.
 
+Lemma X0: X' ij (a1 + a2) = X' ij a1 .* X' ij a2 .
 Lemma XC1: X' ij a ^^ X ij c  = X' ij a.
- Proof. rewrite /X' (ZC1 i j k) //. rsimpl. rewrite ?X'zero ?X'def IdG.
-        rewrite ZC2 plus_0_r X'def ?identity_rule GId ZC3' //; rsimpl.
-        rewrite X'def X'zero IdG -?GA.
-        move: (@Z4 i j k a (-a) 0 0 ij kj ik); rewrite ?forward_rule.
-        rewrite /X' ZC3' // ZC4 // ZC3' // ZC4' //; rsimpl.
-        rewrite ?X'zero ?X'def; cancel. rewrite ZC4' //. rsimpl.
-        by rewrite ?X'zero ?X'def; cancel. Qed.
 Lemma XC2: X' ij a ^^ X ji b = Z' ij a b.
 Lemma XC3: (X' ij a) ^^ (X jk c) = X' ik (a * c) .* X' ij a.
 Lemma XC3': (X' ij a) ^^ (X ki c) = X' kj (-(c * a)) .* X' ij a.
@@ -111,13 +110,74 @@ Lemma XC4: (X' ij a) ^^ (X kj c) = X' ij a.
 Lemma XC4': (X' ij a) ^^ (X ik c) = X' ij a. 
 Lemma XC5: (X' ij a) ^^ (X kl c) = X' ij a. 
 
-by XC ZC5. Qed. by XC ZC4'. Qed. by XC ZC4. Qed. by XC ZC3'. Qed. by XC ZC3. Qed. by XC (@ZC2 i j a 0 b ij ji). Qed.
+by XC ZC5. Qed. by XC ZC4'. Qed.
+by XC ZC4. Qed. by XC ZC3'. Qed.
+by XC ZC3. Qed. by XC (@ZC2 i j a 0 b ij ji). Qed.
+Proof.
+ rewrite /X' (ZC1 i j k) //. simplify0.
+ rewrite ZC2 plus_0_r X'def ZC3' //; simplify0.
+ move: (@Z4 i j k a (-a) 0 0 ij kj ik); simplify0.
+ rewrite /X' ZC3' // ZC4 // ZC3' // ZC4' //; simplify0.
+ by rewrite ZC4'; simplify0.
+Qed.
+by XC Z0. Qed.
 
-Corollary XC4_swap: (X' ij a1) .* (X' kj a2) = (X' kj a2) .* (X' ij a1).
-rewrite {1}swap_comm comm_d1 -X'Inv. cancel. rewrite /conj -X'Inv.
-rewrite {2}/X' Z2 ZC4. rsimpl. rewrite ?X'zero X'def. by cancel. Qed.
+End XC_Corollaries.
+
+Module ZC_tactic.
+Ltac Z_guard :=
+  match goal with
+    | [ |- is_true (negb (eq_op ?X ?X)) ] => fail 1
+    | [ |- is_true (negb (eq_op ?X ?Y)) ] => done
+    | [ |- _ ] => idtac
+  end.
+
+Ltac safe_rw E := try (rewrite E; Z_guard).
+
+ Tactic Notation "safe_rw4" 
+  reference(F1) "," reference(F2) "," reference(F3) "," reference(F4) :=
+  safe_rw F1; safe_rw F2; safe_rw F3; safe_rw F4.
+
+ Ltac ZC := safe_rw4 XC2,  ZC2,  XC3, ZC3;
+            safe_rw4 XC3', ZC3', XC4, ZC4;
+            safe_rw4 XC4', ZC4', XC5, ZC5;
+            rewrite ?forward_rule ?identity_rule; rsimpl; cancel.
+
+ Ltac ZCR := repeat ZC.
+End ZC_tactic.
+
+Section Z_swap. Import ZC_tactic.
+
+Corollary Z4_swap a a1 b i j k {ij : i != j} {ji : j != i} {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j}:
+Z' ij a b .* X' kj a1 = X' kj a1 .* X' ki (a1 * b * a * b) .* X' kj (a1 * b * a) .* Z' ij a b.
+by move: (@Z4 i j k a a1 b 0 ij kj ik); ZCR; simplify0; move /(GCl' (X' kj a1)); rewrite -?GA X'Inv GI IdG. Qed.
+
+Corollary Z4'_swap a a1 b i j k {ij : i != j} {ji : j != i} {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j}:
+Z' ij a b .* X' ik a1 = X' ik (a1 + a * b * a1) .* X' jk (-(b * a * b * a1)) .* Z' ij a b.
+move: (@Z4' i j k a a1 b 0 ij kj ik). ZCR. simplify0. move /(GCl' (X' ik a1)). rewrite -?GA X'Inv GI IdG X0 => ->.
+by bite; rewrite Z4_swap //; simplify0. Qed.
+
+Corollary Z3_swap a a1 b i j k {ij : i != j} {ji : j != i} {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j}:
+X' jk a1 .* Z' ij a b = Z' ij a b .* X' ik (- a * a1) .* X' jk ((1 + b * a) * a1).
+move: (@Z3 i j k a (-a1) b 0 ij kj jk ik). ZCR. simplify0.
+move /(GCr' (X' jk (a1))); rewrite X'Inv ?GA IG GId -?GA => ->.
+rewrite dist_r plus_comm X0 -?GA; rsimpl; bite. rewrite Z4'_swap //.
 
 
+
+End Z_swap.
+
+Section X_swap.
+
+Context (i j k l : nat) (a a1 a2 b c : R)
+        {ij : i != j} {ji : j != i} 
+        {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j} 
+        {kl : k != l} {il : i != l} {jl : j != l} {lk : l != k} {li : l != i} {lj : l != j}.
+
+Corollary X4_swap: (X' ij a1) .* (X' kj a2) = (X' kj a2) .* (X' ij a1).
+ by rewrite Z4_swap //; simplify0. Qed.
+
+End X_swap.
 
 Corollary XC4'_swap: (X' ij a1) .* (X' ik a2) = (X' ik a2) .* (X' ij a1).
 rewrite {1}swap_comm comm_d1 -X'Inv. cancel. rewrite /conj -X'Inv.
@@ -138,31 +198,4 @@ by rewrite ?GA XC5_swap. Qed.
 
 
 End S1.
-
-Section ZC_tactic.
-Ltac Z_guard :=
-  match goal with
-    | [ |- is_true (negb (eq_op ?X ?X)) ] => fail 1
-    | [ |- is_true (negb (eq_op ?X ?Y)) ] => done
-    | [ |- _ ] => idtac
-  end.
-
-Ltac safe_rw E := try (rewrite E; Z_guard).
-
-Tactic Notation "safe_rw4" reference(F1) "," reference(F2) "," 
-                           reference(F3) "," reference(F4) :=
-  safe_rw F1; safe_rw F2; safe_rw F3; safe_rw F4.
-
-Ltac pure_ZC :=
-           safe_rw4 XC2,  ZC2,  XC3, ZC3;
-           safe_rw4 XC3', ZC3', XC4, ZC4;
-           safe_rw4 XC4', ZC4', XC5, ZC5;
-           rewrite ?forward_rule ?identity_rule; rsimpl; cancel.
-Ltac ZCR0 := repeat pure_ZC.
-
-Lemma X0: X' ij a1 .* X' ij a2 = X' ij (a1 + a2).
-Proof. by rewrite /X' Z0. Qed.
-
-
-End ZC_tactic.
 

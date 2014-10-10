@@ -81,6 +81,9 @@ Lemma Idconj g: Id ^ g = Id. by rewrite /conj GId IG. Qed.
 
 Lemma conj_eq g1 g2 h : g1 = g2 -> g1 ^ h = g2 ^ h. by move => ->. Qed.
 
+Lemma eq_inv h g: h = g <-> h ^-1 = g ^-1.
+split. by move => ->. move /eqIdP /(GCl' h). by rewrite GId -GA GI IdG. Qed.
+
 (* Commutators *)
 
 Definition Comm (x y : ZZ) : ZZ := (x .* y .* x^-1 .* y^-1).
