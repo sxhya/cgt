@@ -544,7 +544,7 @@ by rewrite (XC4'_swap k j) //; rsimpl. Qed.
 
 (* ijk *)
 
-(* OBSTACLE *)
+(* OBSTACLE caused by stumbling upon Z ij ^ X ij *)
 Lemma Z2_ZC4_02: (X' kj (-_a1) .* Z' ij a b .* X' kj a1) ^^ X ij c = Z' ij a b ^^ X kj a1 ^^ X ij c.
 ZCR0. rewrite ?X'zero ?X'def -?GA; cancel. Abort.
 
@@ -567,7 +567,7 @@ ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA. ZCR0.
 rewrite ZC4_swap'. bite. rewrite ?X0' XC4'_swap // X0' (plus_comm' _ a1) -plus_assoc' inv_l' plus_0_l'.
 rewrite ?(XC4'_swap' k j i) ?X0' ?X0 //. rewrite plus_comm'. rsimpl. bite. by rewrite plus_comm'. Qed.
 
-(* OBSTACLE - The only nontrivial case*)
+(* OBSTACLE - Nontrivial relation *)
 Lemma Z2_ZC4_02'''': (X' kj (-_a1) .* Z' ij a b .* X' kj a1) ^^ X ik c = Z' ij a b ^^ X kj a1 ^^ X ik c.
 ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA GId. Abort.
 
@@ -576,7 +576,7 @@ ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA GId. Abort.
 Lemma Z2_06: (X' ji (-_a2) .* Z' ij a1 b .* X' ji a2) ^^ (X ji c) = (Z' ij a1 b ^^ X ji a2) ^^ (X ji c).
 ZCR0. by rewrite ?XC1 Z2 ZC2 {1}plus_assoc (plus_comm c) -plus_assoc. Qed.
 
-(* OBSTACLE *)
+(* OBSTACLE - The only nontrivial case *)
 Lemma Z2_06': (X' ji (-_a2) .* Z' ij a1 b .* X' ji a2) ^^ (X ij c) = (Z' ij a1 b ^^ X ji a2) ^^ (X ij c).
 ZCR0. Abort.
 
@@ -597,6 +597,50 @@ rewrite ZC3'_swap' // X'def. rsimpl. rewrite X'zero. bite.
 rewrite GId. rewrite XC4'_swap' //.
 rewrite ?X0 XC4'_swap //. rewrite plus_comm' -?plus_assoc'. rsimpl.
 by rewrite inv_r' plus_0_l'. Qed.
+
+Lemma Z2_07': (X' ji (-_a2) .* Z' ij a1 b .* X' ji a2) ^^ (X jk c) = (Z' ij a1 b ^^ X ji a2) ^^ (X jk c).
+ZCR0. rewrite ?X'zero ?IdG ?X'def -?GA. rexpand.
+apply (GCr (X' ji (-_a2))). rewrite ?X'Inv. cancel.
+rewrite -X'Inv. rewrite ?GA (Gswap (Z' ij _ _) (X' ji (-_ a2))) /conj -?X'Inv Z2.
+rewrite ZC2 plus_assoc -inI inv_r plus_0_r -?GA. bite.
+rewrite ZC3'_swap' //. rsimpl. rewrite X'def X'zero GId. bite.
+rewrite (XC4'_swap j k) //. rewrite X0' plus_assoc'. rsimpl. by rewrite inv_l' plus_0_r'. Qed.
+
+Lemma Z2_07'': (X' ji (-_a2) .* Z' ij a1 b .* X' ji a2) ^^ (X ki c) = (Z' ij a1 b ^^ X ji a2) ^^ (X ki c).
+Admitted. (* Same as for Z2_07' *)
+
+Lemma Z2_07''': (X' ji (-_a2) .* Z' ij a1 b .* X' ji a2) ^^ (X kj c) = (Z' ij a1 b ^^ X ji a2) ^^ (X kj c).
+Admitted. (* Same as for Z2_07 *)
+
+(* Preservation of Z2 (ZC2 flavour) *)
+
+(* OBSTACLE -- But similar to one of above *)
+Lemma Z2_10: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X ij c) = (Z' ij a1 b ^^ X jk a2) ^^ (X ij c).
+Abort.
+
+Lemma Z2_11: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X ji c) = (Z' ij a1 b ^^ X jk a2) ^^ (X ji c).
+ZCR0. rsimpl. rewrite ?X'zero ?IdG ?X'def -?GA.
+rewrite ZC3_swap' //. rsimpl. bite. rewrite ?X0. collect.
+rewrite ?dist_r'. rsimpl. rewrite -plus_assoc' inv_l' plus_0_l' pIp.
+by collect. Qed.
+
+Lemma Z2_12: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X jk c) = (Z' ij a1 b ^^ X jk a2) ^^ (X jk c).
+ZCR0. rewrite ?XC1. ZCR0. (* easy *) Admitted.
+
+(* OBSTACLE -- But similar to one of above *)
+Lemma Z2_13: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X kj c) = (Z' ij a1 b ^^ X jk a2) ^^ (X kj c).
+Abort.
+
+Lemma Z2_14: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X ki c) = (Z' ij a1 b ^^ X jk a2) ^^ (X ki c).
+Lemma Z2_15: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X ik c) = (Z' ij a1 b ^^ X jk a2) ^^ (X ik c).
+Lemma Z2_16: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X il c) = (Z' ij a1 b ^^ X jk a2) ^^ (X il c).
+Lemma Z2_17: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X li c) = (Z' ij a1 b ^^ X jk a2) ^^ (X li c).
+Lemma Z2_18: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X jl c) = (Z' ij a1 b ^^ X jk a2) ^^ (X jl c).
+Lemma Z2_19: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X lj c) = (Z' ij a1 b ^^ X jk a2) ^^ (X lj c).
+Lemma Z2_20: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X kl c) = (Z' ij a1 b ^^ X jk a2) ^^ (X kl c).
+Lemma Z2_21: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X lk c) = (Z' ij a1 b ^^ X jk a2) ^^ (X lk c).
+
+
 
 End Z2_ZC.
 
