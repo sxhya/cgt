@@ -357,11 +357,47 @@ Context (i j k l m n : nat) (a1 a2 b c d : R)
         {mi : m != i}  {mj : m != j} {mk : m != k} {ml : m != l}
         {im : i != m}  {jm : j != m} {km : k != m} {lm : l != m}.
 
-Lemma Z6: ((X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ X ik c) ^^ (X im d) = (Z' ij a2 b ^^ X kj a1 ^^ X ik c) ^^ (X im d).
-ZC. rewrite -ACL01 ?X'def.
-
+Lemma Z4_01: ((X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ X ik c) ^^ (X im d) = (Z' ij a2 b ^^ X kj a1 ^^ X ik c) ^^ (X im d).
 ZCR. rewrite ?X'def ?X'zero -?GA; cancel.
+move: (@Z4FS i j k a2 a1 b c ij ik jk ki kj).
+move /(GCr' ((Z' ij a2 b)^-1)); cancel.
+move /(GCr' (X' jm (- (b * a2 * b * d)) .* X' im (a2 * b * d) .* Z' ij a2 b)).
+rewrite ?GA => <-. rewrite -?GA -Z'Inv.
+rewrite Z3_swap' // (Z4'_swap' i j m) // Z'Inv; cancel. rsimpl.
+rewrite -X0' (plus_comm (a2 * b * d)) -plus_assoc inv_r plus_0_l.
+rewrite (X4_swap' i m j) // -X0' ?dist_r; rsimpl; rewrite inv_plus plus_assoc inv_l plus_0_r.
+rewrite (Z3_swap' k j m) //; simplify0.
+rewrite (X5_swap' k j i m) //; bite.
+rewrite (Z3_swap' i j m) //; simplify0.
+rewrite (X5_swap' i j k m) //.
+rewrite (Z4'_swap' i j m) //; simplify0. bite.
+rewrite (X4_swap' k m i) // -X0'.
+rewrite (Z3_swap' i j m) //; simplify0.
+rewrite (Z4'_swap' i j m) //; simplify0.
+rewrite -X0' (plus_comm _ (a2 * b * d)) ?dist_l ?inv_plus.
+(* rest is straigtforward *) Admitted.
 
+(* Should be similar to the one above*)
+Lemma Z4_02: ((X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ X ik c) ^^ (X jm d) = (Z' ij a2 b ^^ X kj a1 ^^ X ik c) ^^ (X jm d).
+ZCR. rewrite ?X'def ?X'zero -?GA; cancel.
+move: (@Z4FS i j k a2 a1 b c ij ik jk ki kj). Admitted.
 
+(* Should be similar to the one above*)
+Lemma Z4_03: ((X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ X ik c) ^^ (X km d) = (Z' ij a2 b ^^ X kj a1 ^^ X ik c) ^^ (X km d).
+ZCR. rewrite ?X'def ?X'zero -?GA; cancel. Admitted.
+
+Lemma Z4_04: ((X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ X ik c) ^^ (X mi d) = (Z' ij a2 b ^^ X kj a1 ^^ X ik c) ^^ (X mi d).
+ZCR. rewrite ?X'def ?X'zero -?GA; cancel. Admitted.
+
+Lemma Z4_05: ((X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ X ik c) ^^ (X mj d) = (Z' ij a2 b ^^ X kj a1 ^^ X ik c) ^^ (X mj d).
+ZCR. rewrite ?X'def ?X'zero -?GA; cancel. Admitted.
+
+Lemma Z4_06: ((X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ X ik c) ^^ (X mk d) = (Z' ij a2 b ^^ X kj a1 ^^ X ik c) ^^ (X mk d).
+ZCR. rewrite ?X'def ?X'zero -?GA; cancel. Admitted.
+
+Lemma Z4_07: ((X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ X ik c) ^^ (X ij d) = (Z' ij a2 b ^^ X kj a1 ^^ X ik c) ^^ (X ij d).
+ZCR. rewrite ?X'def ?X'zero -?GA; cancel. rewrite identity_rule. cancel.
+rewrite ?(XC1 _ _ k) //.
+move: (@Z4FS i j k a2 a1 b c ij ik jk ki kj).
 
 End Z4_Untangle.
