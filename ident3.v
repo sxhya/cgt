@@ -324,6 +324,44 @@ Abort.
 
 End Z5_Untangle.
 
+Section ACL_Z. Import ZC_tactic.
+
+Context (i j k l : nat) (a b c d : R)
+        {ij : i != j} {ji : j != i} 
+        {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j} 
+        {kl : k != l} {il : i != l} {jl : j != l} {lk : l != k} {li : l != i} {lj : l != j}.
+
+Lemma ACL01: (Z' ji a d ^^ X ik (b)) ^^ X ij (c) = (Z' ji a d ^^ X ij (c)) ^^ X ik (b).
+ZCR. rewrite -?X'Inv. bite. rewrite -X0. by collect. Qed.
+
+Lemma ACL02: (Z' jk a d ^^ X ik (b)) ^^ X ij (c) = (Z' jk a d ^^ X ij (c)) ^^ X ik (b).
+ZCR. rewrite (XC1 _ _ k) // (XC1 _ _ l) //. ZCR. simplify0.
+rewrite -?X'Inv (X4'_swap' i k j) // -X0 -X0' (X4'_swap' i k j) // -X0 -X0'.
+by do 2 (rewrite plus_comm; bite). Qed.
+
+Lemma ACL04 : (Z' kj a b ^^ X ik c) ^^ X jk d = (Z' kj a b ^^ X jk d) ^^ X ik c.
+ZCR. by rewrite -?GA -?X'Inv -X0; collect. Qed.
+
+Lemma ACL05 : (Z' kj a b ^^ X ji c) ^^ X jk d = (Z' kj a b ^^ X jk d) ^^ X ji c.
+ZCR. by rewrite -?GA -?X'Inv -X0; collect. Qed.
+
+End ACL_Z.
+
 Section Z4_Untangle. Import ZC_tactic.
+
+Context (i j k l m n : nat) (a1 a2 b c d : R)
+        {ij : i != j} {ji : j != i} 
+        {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j} 
+        {kl : k != l} {il : i != l} {jl : j != l} {lk : l != k} {li : l != i} {lj : l != j}
+
+        {mi : m != i}  {mj : m != j} {mk : m != k} {ml : m != l}
+        {im : i != m}  {jm : j != m} {km : k != m} {lm : l != m}.
+
+Lemma Z6: ((X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ X ik c) ^^ (X im d) = (Z' ij a2 b ^^ X kj a1 ^^ X ik c) ^^ (X im d).
+ZC. rewrite -ACL01 ?X'def.
+
+ZCR. rewrite ?X'def ?X'zero -?GA; cancel.
+
+
 
 End Z4_Untangle.
