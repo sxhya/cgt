@@ -312,9 +312,18 @@ rewrite (X4'_swap' i l k) // -?X0' -?plus_assoc (plus_comm (a2 * c * d)).
 by rewrite (X4_swap' j k i) // X5_swap // -X0'. Qed.
 
 Lemma Z5_10: (Z' kl a1 b .* Z' ij a2 c) ^^ (X jk d)  = (Z' ij a2 c .* Z' kl a1 b) ^^ (X jk d).
-Abort.
+ZCR. rewrite -?GA. do 2 rewrite Z3'_swap' //. do 2 rewrite Z3_swap' //.
+rewrite (Z5' k l i j) //; bite.
+rewrite (X4'_swap' j l k) // (X4_swap' i k j) // -?X0.
+rexpand; rsimpl; rewrite -?plus_assoc (plus_comm (-(c * a2 * d))). bite.
+by rewrite -2!X0 X5_swap. Qed.
 
+(* Same as above*)
 Lemma Z5_11: (Z' kl a1 b .* Z' ij a2 c) ^^ (X jl d)  = (Z' ij a2 c .* Z' kl a1 b) ^^ (X jl d).
 Abort.
 
-End Z5_Untangle
+End Z5_Untangle.
+
+Section Z4_Untangle. Import ZC_tactic.
+
+End Z4_Untangle.
