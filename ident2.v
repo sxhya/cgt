@@ -372,16 +372,11 @@ ZCR0. by rewrite X'def ZC5_swap' // X0 inv_l' X'zero IdG. Qed.
 Import AxiomLevel3.
 
 Lemma Z2_00': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X lk c) = (Z' ij a1 b ^^ X kl a2) ^^ (X lk c).
+ZCR0.
 Abort.
 
 Lemma Z2_00'': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X kl c) = (Z' ij a1 b ^^ X kl a2) ^^ (X kl c).
 ZCR0. by rewrite ?XC1 (ZC5_swap' i j) // ?X'Inv; cancel. Qed.
-
-(* This proof assumes rk >= 4, which is likely to be superfluous; check this later*)
-Lemma Z2_00''': (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X ij c) = (Z' ij a1 b ^^ X kl a2) ^^ (X ij c).
-ZCR0. rewrite ?(ZC1 _ _ m) //. ZCR0. rsimpl. rewrite -?GA.
-do 2(repeat (rewrite ?(XC5_swap k l) ?(XC5_swap' k l)//); rewrite -(ZC5_swap' _ _ k l) //). 
-by rewrite X0' inv_l' X'zero GId. Qed.
 
 Lemma Z2_04: (X' kl (-_a2) .* Z' ij a1 b .* X' kl a2) ^^ (X ik c) = (Z' ij a1 b ^^ X kl a2) ^^ (X ik c).
 ZCR0. rewrite ?X'zero ?IdG -?GA ?X'def.
@@ -631,7 +626,7 @@ by collect. Qed.
 Lemma Z2_12: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X jk c) = (Z' ij a1 b ^^ X jk a2) ^^ (X jk c).
 ZCR0. rewrite ?XC1. ZCR0. (* easy *) Admitted.
 
-(* OBSTACLE -- But similar to one of above *)
+(* OBSTACLE -- But similar to one of above -- RANK 2 NOT REALLY AN OBSTACLE*)
 Lemma Z2_13: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X kj c) = (Z' ij a1 b ^^ X jk a2) ^^ (X kj c).
 Abort.
 
