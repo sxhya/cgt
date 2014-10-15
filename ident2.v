@@ -1,5 +1,5 @@
 Require Import ssreflect ssrnat ssrbool seq eqtype Ring Group ident.
-Import Ring.RingFacts.
+Import Ring.ideal.
 
 Definition conj' := locked conj.
 Notation "h ^^ g" := (conj' h g) (at level 11, left associativity).
@@ -568,7 +568,7 @@ ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA ?GId. ZCR0. bite.
 rewrite ZC4'_swap' //; rsimpl; rewrite ?X'def; bite. (* This is easy *) Admitted.
 
 Lemma Z2_ZC4_21: (X' ik (-_ a1) .* Z' ij a b .* X' ik a1) ^^ X kj c = Z' ij a b ^^ X ik a1 ^^ X kj c.
-ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA GId.
+ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA GId. Abort.
 
 (* Preservation of Z2 (ZC2 flavour) *)
 
@@ -631,15 +631,28 @@ Lemma Z2_13: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X kj c) = (Z' ij a1 b 
 Abort.
 
 Lemma Z2_14: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X ki c) = (Z' ij a1 b ^^ X jk a2) ^^ (X ki c).
+Abort.
+
 Lemma Z2_15: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X ik c) = (Z' ij a1 b ^^ X jk a2) ^^ (X ik c).
+Abort.
+
 Lemma Z2_16: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X il c) = (Z' ij a1 b ^^ X jk a2) ^^ (X il c).
+Abort.
+
 Lemma Z2_17: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X li c) = (Z' ij a1 b ^^ X jk a2) ^^ (X li c).
+Abort.
+
 Lemma Z2_18: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X jl c) = (Z' ij a1 b ^^ X jk a2) ^^ (X jl c).
+Abort.
+
 Lemma Z2_19: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X lj c) = (Z' ij a1 b ^^ X jk a2) ^^ (X lj c).
+Abort.
+
 Lemma Z2_20: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X kl c) = (Z' ij a1 b ^^ X jk a2) ^^ (X kl c).
+Abort.
+
 Lemma Z2_21: (X' jk (-_a2) .* Z' ij a1 b .* X' jk a2) ^^ (X lk c) = (Z' ij a1 b ^^ X jk a2) ^^ (X lk c).
-
-
+Abort.
 
 End Z2_ZC.
 

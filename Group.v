@@ -59,6 +59,9 @@ move /(GCr' (b^-1)). by rewrite GI. Qed.
 Lemma rotate a b: a .* b = Id -> b .* a = Id.
 intros. apply eqIdP in H. by rewrite H GI. Qed.
 
+Lemma eqI g h : g^-1 = h^-1 -> g = h. intros.
+apply eqIdP'. by rewrite -H GI. Qed.
+
 (* Conjugate elements *)
 
 Definition conj (h g : ZZ) := (g ^-1) .* h .* g.
