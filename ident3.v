@@ -517,28 +517,64 @@ Lemma PR1:
 
 Lemma PR2:
  X' jk a ^^ X ik (- b) ^^ X ji c =
- X' jk a ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b). by ZCR; rewrite (XC1 _ _ i). Qed.
+ X' jk a ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
+by ZCR.  Qed.
 
 Lemma PR3:
  X' ij a ^^ X ik (- b) ^^ X ji c =
  X' ij a ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
 
-by ZCR; rewrite (XC1 _ _ i) //; ZCR;
-rewrite -?GA (X4_swap' i k j) // -X0 -X0' inv_r inv_l; simplify0. Qed.
+by ZCR; rewrite -?GA (X4_swap' i k j) // -X0 -X0' inv_r inv_l; simplify0. Qed.
 
 Lemma PR4:
  X' ji a ^^ X ik (- b) ^^ X ji c =
  X' ji a ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
-by ZCR; rewrite (XC1 _ _ k) //; ZCR; rewrite (XC1 _ _ i) //; ZCR. Qed.
+by ZCR. Qed.
 
 Lemma PR5:
  X' ki a ^^ X ik (- b) ^^ X ji c =
- X' ki a ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b). by ZCR. Qed.
+ X' ki a ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
+by ZCR. Qed.
 
 Lemma PR6:
  X' ik a ^^ X ik (- b) ^^ X ji c =
  X' ik a ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
-by rewrite (XC1 _ _ j) //; ZCR; rewrite (XC1 _ _ i) // (XC1 _ _ j) //; ZCR. Qed.
+by ZCR. Qed.
+
+(* ====== ====== *)
+
+(* not that easy *)
+Lemma ZPR2:
+ Z' jk a d ^^ X ik (- b) ^^ X ji c =
+ Z' jk a d ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
+rewrite -?XC2.
+
+ZCR. rewrite -?GA -?XC2.
+
+Lemma ZPR3:
+ Z' ij a d ^^ X ik (- b) ^^ X ji c =
+ Z' ij a d ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
+ZCR. bite. rewrite (X4_swap' i k j) // -?X0' -?X0. Admitted.
+
+Lemma ZPR4:
+ Z' ji a d ^^ X ik (- b) ^^ X ji c =
+ Z' ji a d ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
+Abort.
+
+Lemma ZPR5:
+ Z' ki a d ^^ X ik (- b) ^^ X ji c =
+ Z' ki a d ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
+ZCR. bite. Admitted.
+
+Lemma ZPR6:
+ Z' ik a d ^^ X ik (- b) ^^ X ji c =
+ Z' ik a d ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
+ZCR. Abort.
+
+Lemma ZPR1:
+ Z' kj a d ^^ X ik (- b) ^^ X ji c =
+ Z' kj a d ^^ X ji c ^^ X ik (- b) ^^ X jk (c * b).
+ZCR. Abort.
 
 
 
