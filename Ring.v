@@ -95,9 +95,11 @@ Ltac collect := repeat rewrite -?inv_plus -?dist_l -?dist_r.
 
 Ltac rexpand := repeat rewrite ?inv_plus ?dist_l ?dist_r.
 
+Ltac cancm E := rewrite -?(plus_comm0 _ E) -?(plus_comm0 _ (-E)); progress (rewrite ?inv_r0 ?inv_l0).
+
 End RingFacts.
 
-Module CommRing. Import RingFacts.
+Module CommRing. Export RingFacts.
 
 Axiom mul_comm: forall a b, a * b = b * a.
 

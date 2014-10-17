@@ -561,7 +561,10 @@ rewrite ?(XC4'_swap' k j i) ?X0' ?X0 //. rewrite plus_comm'. rsimpl. bite. by re
 
 (* OBSTACLE - Nontrivial relation *)
 Lemma Z2_ZC4_02'''': (X' kj (-_a1) .* Z' ij a b .* X' kj a1) ^^ X ik c = Z' ij a b ^^ X kj a1 ^^ X ik c.
-ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA GId. Abort.
+ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA GId.
+
+
+ Abort.
 
 Lemma Z2_ZC4_20: (X' ik (-_ a1) .* Z' ij a b .* X' ik a1) ^^ X jk c = Z' ij a b ^^ X ik a1 ^^ X jk c.
 ZCR0. rewrite ?XC1 ?X'zero ?X'def -?GA ?GId. ZCR0. bite.
