@@ -350,35 +350,58 @@ Context (i j k l m n : nat) (a a1 a2 b c d : R)
         {mi : m != i}  {mj : m != j} {mk : m != k} {ml : m != l}
         {im : i != m}  {jm : j != m} {km : k != m} {lm : l != m}.
 
+(* Formula with 4 Z's *)
+Lemma Z4_01: (X' ik a1 .* X' il a2 .* X' ik (-a1) .* X' il (-a2)) ^^ X ki b ^^ X li d = Id.
+ZCR; simplify0. Abort.
+           
+(* a1 = ik = b; a2 = il = c*)
+  
+Lemma Z4_02: (X' il a2 .* X' jk a1 .* X' il (-a2) .* X' jk (-a1)) ^^ X ki b ^^ X li d = Id.
+ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
+
+Lemma Z4_03: (X' ik a1 .* X' jl a2 .* X' ik (-a1) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
+ZCR; simplify0. Admitted.
+
+Lemma Z4_04: (X' jk a1 .* X' jl a2 .* X' jk (-a1) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
+ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
+
+(* Not obvious *)
+Lemma Z4_05: (X' jk a1 ^^ X ij (-(1)) .* X' jk (-a1)) ^^ X ki b ^^ X li d = Id.
+ZCR; simplify0. rewrite ?X'zero ?GId. Abort.
+
+(* Same problem *)
+Lemma Z4_05: (X' jl a2 ^^ X ij (-(1)) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
+ZCR; simplify0. rewrite ?X'zero ?GId. Abort.
+
 (* a, c in I *)
 
 (* Formula with 5 Z's *)
 
-Lemma Z4_01: (X' ij a .* X' jl c .* X' ij (-a) .* X' jl (-c)) ^^ X ji b ^^ X lj d =
+Lemma Z3_01: (X' ij a .* X' jl c .* X' ij (-a) .* X' jl (-c)) ^^ X ji b ^^ X lj d =
              (X' il (a*c)) ^^ X ji b ^^ X lj d.
 ZCR; simplify0. Abort.
 
 (* not obvious, but only 1 Z*)
-Lemma Z4_02: (X' ik a .* X' kl c .* X' ik (-a) .* X' kl (-c)) ^^ X ji b ^^ X lj d =
-             (X' il (a*c)) ^^ X ji b ^^ X lj d.
+Lemma Z3_02: (X' ik a1 .* X' kl a2 .* X' ik (-a1) .* X' kl (-a2)) ^^ X ji b ^^ X lj d =
+             (X' il (a1*a2)) ^^ X ji b ^^ X lj d.
 ZCR; simplify0. rewrite X'zero GId. Abort.
 
 (* this is obvious *)
-Lemma Z4_03: (X' il (a*c) ^^ X jk 1 .* X' il (-(a*c))) ^^ X ji b ^^ X lj d = Id.
+Lemma Z3_03: (X' il (a*c) ^^ X jk 1 .* X' il (-(a*c))) ^^ X ji b ^^ X lj d = Id.
 ZCR; simplify0. Admitted.
 
 (* this should involve only Z?_swap type equations *)
-Lemma Z4_04: (X' ij a .* (X' ij (-a) ^^ X jk 1)) ^^ X ji b ^^ X lj d =
+Lemma Z3_04: (X' ij a .* (X' ij (-a) ^^ X jk 1)) ^^ X ji b ^^ X lj d =
              (X' ik a) ^^ X ji b ^^ X lj d.
 ZCR; simplify0. Admitted.
 
 (* this is obvious *)
-Lemma Z4_05: (X' kl c ^^ X jk (-(1)) .* X' kl (-c) ) ^^ X ji b ^^ X lj d =
+Lemma Z3_05: (X' kl c ^^ X jk (-(1)) .* X' kl (-c) ) ^^ X ji b ^^ X lj d =
              (X' jl c) ^^ X ji b ^^ X lj d.
 ZCR; simplify0. Admitted.
 
 (* this should involve only Z?_swap type equations *)
-Lemma Z4_06: (X' ij (a) .* X' kl c .* X' ij (-a) .* X' kl (-c)) ^^ X ji b ^^ X lj d = Id.
+Lemma Z3_06: (X' ij (a) .* X' kl c .* X' ij (-a) .* X' kl (-c)) ^^ X ji b ^^ X lj d = Id.
 ZCR; simplify0. Admitted.
 
 Lemma Z4_01: (X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ (X im d) = (Z' ij a2 b ^^ X kj a1) ^^ (X im d).
