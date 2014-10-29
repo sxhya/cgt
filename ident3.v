@@ -350,6 +350,37 @@ Context (i j k l m n : nat) (a a1 a2 b c d : R)
         {mi : m != i}  {mj : m != j} {mk : m != k} {ml : m != l}
         {im : i != m}  {jm : j != m} {km : k != m} {lm : l != m}.
 
+(* a, c in I *)
+
+(* Formula with 5 Z's *)
+
+Lemma Z4_01: (X' ij a .* X' jl c .* X' ij (-a) .* X' jl (-c)) ^^ X ji b ^^ X lj d =
+             (X' il (a*c)) ^^ X ji b ^^ X lj d.
+ZCR; simplify0. Abort.
+
+(* not obvious, but only 1 Z*)
+Lemma Z4_02: (X' ik a .* X' kl c .* X' ik (-a) .* X' kl (-c)) ^^ X ji b ^^ X lj d =
+             (X' il (a*c)) ^^ X ji b ^^ X lj d.
+ZCR; simplify0. rewrite X'zero GId. Abort.
+
+(* this is obvious *)
+Lemma Z4_03: (X' il (a*c) ^^ X jk 1 .* X' il (-(a*c))) ^^ X ji b ^^ X lj d = Id.
+ZCR; simplify0. Admitted.
+
+(* this should involve only Z?_swap type equations *)
+Lemma Z4_04: (X' ij a .* (X' ij (-a) ^^ X jk 1)) ^^ X ji b ^^ X lj d =
+             (X' ik a) ^^ X ji b ^^ X lj d.
+ZCR; simplify0. Admitted.
+
+(* this is obvious *)
+Lemma Z4_05: (X' kl c ^^ X jk (-(1)) .* X' kl (-c) ) ^^ X ji b ^^ X lj d =
+             (X' jl c) ^^ X ji b ^^ X lj d.
+ZCR; simplify0. Admitted.
+
+(* this should involve only Z?_swap type equations *)
+Lemma Z4_06: (X' ij (a) .* X' kl c .* X' ij (-a) .* X' kl (-c)) ^^ X ji b ^^ X lj d = Id.
+ZCR; simplify0. Admitted.
+
 Lemma Z4_01: (X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ (X im d) = (Z' ij a2 b ^^ X kj a1) ^^ (X im d).
 ZCR. rewrite ?X'def ?X'zero -?GA; cancel.
 rewrite Z4_swap' //.
