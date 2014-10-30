@@ -349,29 +349,64 @@ Context (i j k l m n : nat) (a a1 a2 b c d : R)
 
         {mi : m != i}  {mj : m != j} {mk : m != k} {ml : m != l}
         {im : i != m}  {jm : j != m} {km : k != m} {lm : l != m}.
+  
+Lemma L01: (X' il a2 .* X' jk a1 .* X' il (-a2) .* X' jk (-a1)) ^^ X ki b ^^ X li d = Id.
+ZCR; simplify0. rewrite ?X'zero ?GId.
+rewrite (Z3'_swap' i l j a2) // (Z5' j k i l) // X'def
+        (Z3'_swap' i l k a2) // (Z4_swap' i l k) // Z'Inv; cancel.
+rewrite (X4'_swap' k i l) // -?X0'.
+rewrite (plus_comm (b*a2)) -plus_assoc inv_l plus_0_l.
+rewrite (X4'_swap' k i l) // -?X0' ?dist_l plus_assoc; rsimpl.
+rewrite inv_l plus_0_r (X4_swap' k i j) // (X5_swap' k l j i) //.
+rewrite (X4'_swap' j k i) // (X4'_swap' j l i) // plus_comm -X0'
+        plus_assoc inv_r plus_0_r (Z3_swap' j k l) // X'def; rsimpl.
+rewrite (X4_swap' j l k) // -X0' inv_l X'zero GId
+        (Z3_swap' j k i) // X'def; rsimpl.
+rewrite -X0' inv_r X'zero GId
+        (X5_swap' k l j i) // -X0' inv_l X'zero GId
+        (X4_swap' j i k) // -X0' -X0 ?inv_l ?X'zero GId //. Qed.  
+
+Lemma L02: (X' ik a1 .* X' jl a2 .* X' ik (-a1) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
+ZCR; simplify0.
+rewrite (Z3'_swap' i k j a1) // (Z5' j l i k) // X'def
+        (Z3'_swap' i k l a1) // (Z4_swap' i k l) // Z'Inv; cancel.
+rewrite (X4'_swap' l i k) // -?X0' (plus_comm (d*a1)) -plus_assoc inv_l plus_0_l.
+rewrite (X4'_swap' l k i) // -X0' ?dist_l plus_assoc; rsimpl.
+rewrite inv_l plus_0_r. Admitted.
+
+Lemma L03: (X' jk a1 .* X' jl a2 .* X' jk (-a1) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
+ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
+
+Lemma L04: (X' jk a1 ^^ X ij (-(1)) .* X' jk (-a1)) ^^ X ki b ^^ X li d = 
+              Z' ik a1 b ^^ X li d.
+ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
+
+Lemma L05: (X' jl a2 ^^ X ij (-(1)) .* X' jl (-a2)) ^^ X ki b ^^ X li d = 
+              X' il a2 ^^ X ki b ^^ X li d.
+ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
 
 (* Formula with 4 Z's *)
 Lemma Z4_01: (X' ik a1 .* X' il a2 .* X' ik (-a1) .* X' il (-a2)) ^^ X ki b ^^ X li d = Id.
-ZCR; simplify0. Abort.
-           
-(* a1 = ik = b; a2 = il = c*)
-  
-Lemma Z4_02: (X' il a2 .* X' jk a1 .* X' il (-a2) .* X' jk (-a1)) ^^ X ki b ^^ X li d = Id.
-ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
+rewrite ?forward_rule ?XC2.
 
-Lemma Z4_03: (X' ik a1 .* X' jl a2 .* X' ik (-a1) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
-ZCR; simplify0. Admitted.
+(* Lemma Z4_01: (X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ (X im d) = (Z' ij a2 b ^^ X kj a1) ^^ (X im d).
+ZCR. rewrite ?X'def ?X'zero -?GA; cancel.
+rewrite Z4_swap' //.
+rewrite (X5_swap' i m k j) // (Z3'_swap' i m k) // X'def (X5_swap' i m k j) //
+        (Z3'_swap' j m k) // X'def (X5_swap' j m k i) //
+        (Z3_swap' k j m) // -X0.
+simplify0. rewrite inv_l. by simplify0. Qed. *)
 
-Lemma Z4_04: (X' jk a1 .* X' jl a2 .* X' jk (-a1) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
-ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
+End Z4_Untangle.
 
-(* Not obvious *)
-Lemma Z4_05: (X' jk a1 ^^ X ij (-(1)) .* X' jk (-a1)) ^^ X ki b ^^ X li d = Id.
-ZCR; simplify0. rewrite ?X'zero ?GId. Abort.
+Section Z3_Untangle.
+Context (i j k l m n : nat) (a a1 a2 b c d : R)
+        {ij : i != j} {ji : j != i} 
+        {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j} 
+        {kl : k != l} {il : i != l} {jl : j != l} {lk : l != k} {li : l != i} {lj : l != j}
 
-(* Same problem *)
-Lemma Z4_05: (X' jl a2 ^^ X ij (-(1)) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
-ZCR; simplify0. rewrite ?X'zero ?GId. Abort.
+        {mi : m != i}  {mj : m != j} {mk : m != k} {ml : m != l}
+        {im : i != m}  {jm : j != m} {km : k != m} {lm : l != m}.
 
 (* a, c in I *)
 
@@ -404,12 +439,4 @@ ZCR; simplify0. Admitted.
 Lemma Z3_06: (X' ij (a) .* X' kl c .* X' ij (-a) .* X' kl (-c)) ^^ X ji b ^^ X lj d = Id.
 ZCR; simplify0. Admitted.
 
-Lemma Z4_01: (X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ (X im d) = (Z' ij a2 b ^^ X kj a1) ^^ (X im d).
-ZCR. rewrite ?X'def ?X'zero -?GA; cancel.
-rewrite Z4_swap' //.
-rewrite (X5_swap' i m k j) // (Z3'_swap' i m k) // X'def (X5_swap' i m k j) //
-        (Z3'_swap' j m k) // X'def (X5_swap' j m k i) //
-        (Z3_swap' k j m) // -X0.
-simplify0. rewrite inv_l. by simplify0. Qed.
-
-End Z4_Untangle.
+End Z3_Untangle.
