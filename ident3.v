@@ -340,16 +340,13 @@ by rewrite (X4'_swap' j l k) // -X0' -X0; rexpand; rsimpl. Qed.
 
 End Z5_Untangle.
 
-Section Z4_Untangle. Import ZC_tactic.
+Section ChicagoBuilding. Import ZC_tactic.
 
-Context (i j k l m n : nat) (a a1 a2 b c d : R)
+Context (i j k l m n : nat) (a1 a2 b d : R)
         {ij : i != j} {ji : j != i} 
         {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j} 
-        {kl : k != l} {il : i != l} {jl : j != l} {lk : l != k} {li : l != i} {lj : l != j}
+        {kl : k != l} {il : i != l} {jl : j != l} {lk : l != k} {li : l != i} {lj : l != j}.
 
-        {mi : m != i}  {mj : m != j} {mk : m != k} {ml : m != l}
-        {im : i != m}  {jm : j != m} {km : k != m} {lm : l != m}.
-  
 Lemma L01: (X' il a2 .* X' jk a1 .* X' il (-a2) .* X' jk (-a1)) ^^ X ki b ^^ X li d = Id.
 ZCR; simplify0. rewrite ?X'zero ?GId.
 rewrite (Z3'_swap' i l j a2) // (Z5' j k i l) // X'def
@@ -364,30 +361,51 @@ rewrite (X4_swap' j l k) // -X0' inv_l X'zero GId
         (Z3_swap' j k i) // X'def; rsimpl.
 rewrite -X0' inv_r X'zero GId
         (X5_swap' k l j i) // -X0' inv_l X'zero GId
-        (X4_swap' j i k) // -X0' -X0 ?inv_l ?X'zero GId //. Qed.  
-
+        (X4_swap' j i k) // -X0' -X0 ?inv_l ?X'zero GId //. Qed. 
 Lemma L02: (X' ik a1 .* X' jl a2 .* X' ik (-a1) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
 ZCR; simplify0.
 rewrite (Z3'_swap' i k j a1) // (Z5' j l i k) // X'def
         (Z3'_swap' i k l a1) // (Z4_swap' i k l) // Z'Inv; cancel.
-rewrite (X4'_swap' l i k) // -?X0' (plus_comm (d*a1)) -plus_assoc inv_l plus_0_l.
-rewrite (X4'_swap' l k i) // -X0' ?dist_l plus_assoc; rsimpl.
-rewrite inv_l plus_0_r. Admitted.
+rewrite (X4'_swap' l i k) // -?X0' (plus_comm (d*a1)) -plus_assoc inv_l plus_0_l
+        (X4'_swap' l k i) // -X0' ?dist_l plus_assoc; rsimpl.
+rewrite inv_l plus_0_r
+        (Z3_swap' j l i) // X'def; rsimpl.
+rewrite (Z3_swap' j l k) // X'def; rsimpl.
+rewrite (X4'_swap' j l i) // -X0' inv_r X'zero GId
+        (X4'_swap' j k i) // (X5_swap' l k j i) // -X0'
+        (X4_swap' l i j) // (X4'_swap' j k i) // -X0'
+        plus_assoc -(plus_assoc _ _ (-(a2 * d)))inv_l plus_0_l inv_r X'zero GId.
+rewrite (X5_swap' j k l i) // (X4_swap' j k l) // -X0' inv_l X'zero GId
+        (X4'_swap' l k i) // -X0' -X0 ?inv_l ?X'zero GId //. Qed.
 
 Lemma L03: (X' jk a1 .* X' jl a2 .* X' jk (-a1) .* X' jl (-a2)) ^^ X ki b ^^ X li d = Id.
-ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
+ZCR; simplify0. rewrite ?X'zero ?GId.
+rewrite (X4'_swap j i k) // -X0'
+        (X4'_swap' j k i) // -X0'
+        (X4'_swap' j i l) // -X0' -inv_plus inv_r X'zero GId
+        (X4'_swap' j k l) // -?X0' inv_r X'zero GId -X0 inv_r X'zero //. Qed.
 
-Lemma L04: (X' jk a1 ^^ X ij (-(1)) .* X' jk (-a1)) ^^ X ki b ^^ X li d = 
-              Z' ik a1 b ^^ X li d.
-ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
+Lemma L04: (X' jk a1 ^^ X ij (-(1)) .* X' jk (-a1)) ^^ X ki b ^^ X li d = Z' ik a1 b ^^ X li d.
+ZCR; simplify0. rewrite ?X'zero ?GId. bite.
+rewrite (X4'_swap' j i k) // -X0' inv_r X'zero GId -X0' inv_r X'zero GId //. Qed.
 
-Lemma L05: (X' jl a2 ^^ X ij (-(1)) .* X' jl (-a2)) ^^ X ki b ^^ X li d = 
-              X' il a2 ^^ X ki b ^^ X li d.
-ZCR; simplify0. rewrite ?X'zero ?GId. Admitted.
+Lemma L05: (X' jl a2 ^^ X ij (-(1)) .* X' jl (-a2)) ^^ X ki b ^^ X li d = X' il a2 ^^ X ki b ^^ X li d.
+ZCR; simplify0. rewrite ?X'zero ?GId. bite.
+rewrite (X4'_swap' j i l) //; do 2 rewrite -X0' inv_r X'zero GId //. Qed.
+
+End ChicagoBuilding.
+
+Section Z4_Untangle. Import ZC_tactic.
+
+Context (i j k l m n : nat) (a1 a2 b d : R)
+        {ij : i != j} {ji : j != i} 
+        {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j} 
+        {kl : k != l} {il : i != l} {jl : j != l} {lk : l != k} {li : l != i} {lj : l != j}.
 
 (* Formula with 4 Z's *)
 Lemma Z4_01: (X' ik a1 .* X' il a2 .* X' ik (-a1) .* X' il (-a2)) ^^ X ki b ^^ X li d = Id.
 rewrite ?forward_rule ?XC2.
+Check
 
 (* Lemma Z4_01: (X' kj (- a1) .* Z' ij a2 b .* X' kj a1) ^^ (X im d) = (Z' ij a2 b ^^ X kj a1) ^^ (X im d).
 ZCR. rewrite ?X'def ?X'zero -?GA; cancel.
@@ -399,7 +417,7 @@ simplify0. rewrite inv_l. by simplify0. Qed. *)
 
 End Z4_Untangle.
 
-Section Z3_Untangle.
+Section Z3_Untangle. Import ZC_tactic.
 Context (i j k l m n : nat) (a a1 a2 b c d : R)
         {ij : i != j} {ji : j != i} 
         {ik : i != k} {jk : j != k} {ki : k != i} {kj : k != j} 
