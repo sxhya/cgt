@@ -81,3 +81,23 @@ Lemma R4': forall (i j k : nat) (a b : ZZ) (ij : coo (n.+1) i j) (j' : nat) (p :
    rewrite GA -(R3 j k i j' b a jk ij' (coo_ne' ij) (coo_ne' j'j) (coo_ne' ik) (coo_ne' j'k)).
    by cancel. Qed.
 
+Lemma R4'': forall (i j k : nat) (a b : ZZ) (ij : coo n i j) (j' : nat) (p : between j j' k)
+                                            (jk : coo (n.+1) j k) (ik : coo (n.+1) i k),
+   exists p',
+   (s ij a) ^ (s' j' p jk b) = (s' j' p' ik (a .* b)). intros.
+   assert (p': between i j' k). move: p ij. rewrite /between /coo => A0 /andP [] A1 A2. ssromega.
+   exists p'. rewrite /s'.
+   move: (split1 n j j' k jk p) => jj'.
+   move: (split2 n j j' k jk p) => j'k.
+   move: (split1 n i j' k ik p') => ij'.
+   move: (split2 n i j' k ik p') => j'k2.
+   rewrite -(coo_irrel n j' k j'k j'k2).
+   rewrite -(R4 i j j' a b ij jj' ij').
+   expand. bite.
+   rewrite (R3 j' k i j Id a j'k ij (coo_ne' ij') (coo_ne' jj') (coo_ne' ik)  (coo_ne' jk)).
+   by cancel. Qed.
+
+Lemma R4''': forall (i j k : nat) (a b : ZZ) (ij : coo n i j) (j' : nat) (p : between j j' k)
+                                             (jk : coo (n.+1) j k) (ik : coo (n.+1) i k),
+
+
