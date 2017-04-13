@@ -162,6 +162,12 @@ Lemma R3A: forall (i j k l : nat) (a b : ZZ) (ij : coo (n.+1) i j) (kl : coo n k
       move: (R3a b Id kl j'j (neqs A0) (neqs H1) (neqs A1) (neqs H2)) => ->.
       by move: (R3 a b ij' kl H H0 A0 A1) => ->. Qed.
 
+Lemma R2A: forall {i j k : nat} (a b a' b': ZZ) (ij : coo (n.+1) i j) (jk : coo n j k) (j' : nat) (p : between i j' j), a .* b = a' .* b' ->
+   (s' j' p ij a) ^ (s jk b) = (s jk b') ^ (s' j' p ij a').
+
+  intros. rewrite /s'.
+  move: (split1 n i j' j ij p) (split2 n i j' j ij p) => ij' j'j.
+  rewrite {4}/conj -R1b. 
 
 
 
@@ -177,6 +183,15 @@ Lemma R3A: forall (i j k l : nat) (a b : ZZ) (ij : coo (n.+1) i j) (kl : coo n k
 
 
 
- 
+
+
+
+
+
+
+
+
+
+
 
 
