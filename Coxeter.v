@@ -26,7 +26,7 @@ Lemma R1b: forall {i j : nat} (ij : coo n i j) (g : ZZ), (s ij g) = (s ij g) ^-1
 Axiom R2: forall {i j k : nat} (a b a' b': ZZ) (ij : coo n i j) (jk : coo n j k), a .* b = a' .* b' ->
    (s ij a) ^ (s jk b) = (s jk b') ^ (s ij a').
 
-Lemma R2a: forall (i j k : nat) (a b a' b': ZZ) (ij : coo n i j) (jk : coo n j k), a .* b = a' .* b' ->
+Lemma R2a: forall {i j k : nat} (a b a' b': ZZ) (ij : coo n i j) (jk : coo n j k), a .* b = a' .* b' ->
    (s ij a) ^ (s jk b) = (s ij a') ^ (s jk b').
  intros. rewrite (R2 a b a' b') //. rewrite -(R2 a' b' a' b') //. Qed.
 
@@ -71,14 +71,14 @@ Lemma wd2: forall (i j : nat) (g : ZZ) (ij : coo n i j) (k : nat) (p : between i
 Lemma R1A: forall (i j : nat) (g : ZZ) (ij : coo (n.+1) i j) (k k' : nat) (p : between i k j) (p' : between i k' j),
   (s' k p ij g) .* (s' k p ij g) = Id. intros. by rewrite /s' -mul_conj R1 Idconj. Qed.
 
-Lemma R4A: forall (i j k : nat) (a b : ZZ) (ij : coo (n.+1) i j) (j' : nat) (p : between i j' j)
+Lemma R4A: forall {i j k : nat} (a b : ZZ) (ij : coo (n.+1) i j) (j' : nat) (p : between i j' j)
                                            (jk : coo n j k) (ik : coo (n.+1) i k),
    exists p',
    (s' j' p ij a) ^ (s jk b) = (s' j' p' ik (a .* b)).
 
    intros. assert (p': between i j' k). move: p jk. rewrite /between /coo => A0 /andP [] A1 A2. ssromega. exists p'. rewrite /s'.
    move: (split1 n i j' j ij p) (split2 n i j' j ij p) (split1 n i j' k ik p') (split2 n i j' k ik p') => ij' j'j ij'2 j'k.
-   rewrite -(coo_irrel n i j' ij' ij'2) -conj_mul (R1a jk b) R4 IdG (R2a i j' k (a .* b) Id a b ij' j'k); [| by cancel]. expand. bite.
+   rewrite -(coo_irrel n i j' ij' ij'2) -conj_mul (R1a jk b) R4 IdG (R2a (a .* b) Id a b ij' j'k); [| by cancel]. expand. bite.
    rewrite GA -(R3 b a jk ij' (coo_ne' ij) (coo_ne' j'j) (coo_ne' ik) (coo_ne' j'k)). by cancel. Qed.
 
 Lemma R4B: forall (i j k : nat) (a b : ZZ) (ij : coo n i j) (j' : nat) (p : between j j' k)
@@ -167,31 +167,15 @@ Lemma R2A: forall {i j k : nat} (a b a' b': ZZ) (ij : coo (n.+1) i j) (jk : coo 
 
   intros. rewrite /s'.
   move: (split1 n i j' j ij p) (split2 n i j' j ij p) => ij' j'j.
-  rewrite {4}/conj -R1b. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  rewrite {4}/conj -R1b GA conj_mul -(R2 Id b' Id b' j'j jk) // -2!conj_mul -GA.
+  assert (A0: k <> i). move: ij jk => /andP [] B0 _ /andP [] B1 _. ssromega.
+  assert (A1: k <> j'). move: j'j jk => /andP [] B0 _ /andP [] B1 _. ssromega.
+  
+  by rewrite (R3 b' a' jk ij' (coo_ne' ij) (coo_ne' j'j) A0 A1) GA (R1a j'j Id) 2!conj_mul
+          -(R2 a' Id a' Id ij' j'j) // -2!conj_mul -GA R1 IdG conj_mul
+          -(R2 b' Id  Id b' j'j jk) ?GId ?IdG // {4}/conj -R1b GA conj_mul
+          (R3a a' Id ij' jk (coo_ne ij) (neqs A0) (coo_ne j'j) (neqs A1))
+          conj_mul -(R2a a b a' b' ij' j'j H) -?conj_mul (R1a jk Id)
+          (R2a b Id Id b j'j jk) ?GId ?IdG // {3}/conj GA ?conj_mul -R1b
+          (R3a a Id ij' jk (coo_ne ij) (neqs A0) (coo_ne j'j) (neqs A1))
+          (R3a a b ij' jk (coo_ne ij) (neqs A0) (coo_ne j'j) (neqs A1)). Qed.
