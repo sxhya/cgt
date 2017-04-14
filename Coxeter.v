@@ -170,20 +170,63 @@ intros. rewrite /conj -R1b. by rewrite GA (R3A a b ij kl) // -GA R1 IdG. Qed.
 Lemma R2A: forall {i j k : nat} (a b a' b': ZZ) (ij : coo (n.+1) i j) (jk : coo n j k) (j' : nat) (p : between i j' j), a .* b = a' .* b' ->
    (s' j' p ij a) ^ (s jk b) = (s jk b') ^ (s' j' p ij a').
 
+ intros. rewrite /s'.
+ move: (split1 n i j' j ij p) (split2 n i j' j ij p) => ij' j'j.
+ rewrite {4}/conj -R1b GA conj_mul.
+ rewrite -(R2 Id b' Id b' j'j jk) //.
+ rewrite -2!conj_mul -GA.
+ assert (A0: k <> i). move: ij jk => /andP [] B0 _ /andP [] B1 _. ssromega.
+ assert (A1: k <> j'). move: j'j jk => /andP [] B0 _ /andP [] B1 _. ssromega.
+
+ rewrite (R3 b' a' jk ij' (coo_ne' ij) (coo_ne' j'j) A0 A1) GA (R1a j'j Id).
+ rewrite 2!conj_mul.
+ rewrite -(R2 a' Id a' Id ij' j'j) //.
+ rewrite -2!conj_mul -GA R1 IdG conj_mul.
+ rewrite -(R2 b' Id  Id b' j'j jk) ?GId ?IdG //.
+ rewrite {4}/conj -R1b GA conj_mul.
+ rewrite (R3a a' Id ij' jk (coo_ne ij) (neqs A0) (coo_ne j'j) (neqs A1)).
+ rewrite conj_mul.
+ rewrite -(R2a a b a' b' ij' j'j H).
+ rewrite -?conj_mul (R1a jk Id).
+ rewrite (R2a b Id Id b j'j jk) ?GId ?IdG //.
+ rewrite {3}/conj GA ?conj_mul -R1b.
+ rewrite (R3a a Id ij' jk (coo_ne ij) (neqs A0) (coo_ne j'j) (neqs A1)).
+ rewrite (R3a a b ij' jk (coo_ne ij) (neqs A0) (coo_ne j'j) (neqs A1)). 
+ done. Qed.
+
+Lemma R2B: forall {i j k : nat} (a b a' b': ZZ) (ij : coo n i j) (jk : coo (n.+1) j k) (j' : nat) (p : between j j' k), a .* b = a' .* b' ->
+   (s ij a) ^ (s' j' p jk b) = (s' j' p jk b') ^ (s ij a').
+
   intros. rewrite /s'.
-  move: (split1 n i j' j ij p) (split2 n i j' j ij p) => ij' j'j.
-  rewrite {4}/conj -R1b GA conj_mul -(R2 Id b' Id b' j'j jk) // -2!conj_mul -GA.
-  assert (A0: k <> i). move: ij jk => /andP [] B0 _ /andP [] B1 _. ssromega.
-  assert (A1: k <> j'). move: j'j jk => /andP [] B0 _ /andP [] B1 _. ssromega.
-  
-  by rewrite (R3 b' a' jk ij' (coo_ne' ij) (coo_ne' j'j) A0 A1) GA (R1a j'j Id) 2!conj_mul
-          -(R2 a' Id a' Id ij' j'j) // -2!conj_mul -GA R1 IdG conj_mul
-          -(R2 b' Id  Id b' j'j jk) ?GId ?IdG // {4}/conj -R1b GA conj_mul
-          (R3a a' Id ij' jk (coo_ne ij) (neqs A0) (coo_ne j'j) (neqs A1))
-          conj_mul -(R2a a b a' b' ij' j'j H) -?conj_mul (R1a jk Id)
-          (R2a b Id Id b j'j jk) ?GId ?IdG // {3}/conj GA ?conj_mul -R1b
-          (R3a a Id ij' jk (coo_ne ij) (neqs A0) (coo_ne j'j) (neqs A1))
-          (R3a a b ij' jk (coo_ne ij) (neqs A0) (coo_ne j'j) (neqs A1)). Qed.
+  move: (split1 n j j' k jk p) (split2 n j j' k jk p) => jj' j'k. symmetry.
+  rewrite {4}/conj -R1b GA conj_mul.
+
+  assert (A0: i <> j'). move: ij jj' => /andP [] B0 _ /andP [] B1 _. ssromega.
+  assert (A1: i <> k). move: ij jk => /andP [] B0 _ /andP [] B1 _. ssromega.
+
+  rewrite (R3a a Id ij j'k A0 A1 (coo_ne jj') (coo_ne jk)).
+  rewrite conj_mul.
+  rewrite (R2 a b a' b' ij jj') //.
+  rewrite -?conj_mul.
+  rewrite (R1a j'k Id).
+  by move: (R3a a' Id ij j'k A0 A1 (coo_ne jj') (coo_ne jk)) => ->. Qed.
+
+Lemma R2C: forall {i j k : nat} (a b a' b': ZZ) (ij : coo (n.+1) i j) (jk : coo (n.+1) j k) (j' : nat) (p : between i j' j) (k' : nat) (pk : between j k' k), a .* b = a' .* b' ->
+   (s' j' p ij a) ^ (s' k' pk jk b) = (s' k' pk jk b') ^ (s' j' p ij a').
+
+  intros. remember (s' k' pk jk b) as z.   rewrite /s' in Heqz.
+          remember (s' k' pk jk b') as z'. rewrite /s' in Heqz'.
+  move: (split1 n j k' k jk pk) (split2 n j k' k jk pk) Heqz Heqz' => jk' k'k -> ->. symmetry.
+  rewrite {4}/conj -R1b GA conj_mul.
+  assert (A0: i <> k'). move: ij jk' => /andP [] B0 _ /andP [] B1 _. ssromega.
+  assert (A1: i <> k). move: ij jk => /andP [] B0 _ /andP [] B1 _. ssromega.
+
+  rewrite (R3Aa a Id ij k'k j' p A0 A1 (coo_ne jk') (coo_ne jk)). 
+  rewrite conj_mul.
+  rewrite (R2A a b a' b' ij jk') //.
+  rewrite -?conj_mul.
+  rewrite (R1a k'k Id).
+  by move: (R3Aa a' Id ij k'k j' p A0 A1 (coo_ne jk') (coo_ne jk)) => ->. Qed.
   
 Lemma R3B: forall (i j k l : nat) (a b : ZZ) (ij : coo (n.+1) i j) (kl : coo (n.+1) k l) (j' k' : nat) (p : between i j' j) (pk : between k k' l),
  i <> k -> i <> l -> j <> k -> j <> l -> (s' j' p ij a) .* (s' k' pk kl b) = (s' k' pk kl b) .* (s' j' p ij a).
